@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十七章：第三方库与虚拟环境 — Python 学习教程</title>
+  <meta name="description" content="Python 第三方库与虚拟环境教程，学习 venv 虚拟环境、requests 网络请求、Pillow 图像处理、chardet 编码检测与 psutil 系统监控。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <span>Python</span>
+      </a>
+      <button class="nav-toggle" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <!-- Sidebar -->
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#venv-detail" class="active">虚拟环境详解</a></li>
+          <li><a href="#requests">requests</a></li>
+          <li><a href="#pillow">Pillow</a></li>
+          <li><a href="#chardet">chardet</a></li>
+          <li><a href="#psutil">psutil</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a>
+          <span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a>
+          <span class="separator">/</span>
+          <span>第三方库与虚拟环境</span>
+        </div>
+
+        <h1>第十七章：第三方库与虚拟环境</h1>
+        <div class="chapter-meta">
+          <span>难度：高级</span>
+          <span>预计学习时间：1 周</span>
+          <span>前置知识：模块与包管理、虚拟环境基础</span>
+        </div>
+
+        <p>Python 之所以强大，很大程度上得益于其庞大而活跃的第三方库生态。但直接使用系统 Python 安装全局库，容易造成不同项目之间的依赖冲突。本章我们学习如何用虚拟环境隔离项目依赖，并实战五个最常用的第三方库：<code class="inline">requests</code>、<code class="inline">Pillow</code>、<code class="inline">chardet</code> 与 <code class="inline">psutil</code>。</p>
+
+        <!-- venv detail -->
+        <h2 data-section="venv-detail">虚拟环境详解</h2>
+        <p>虚拟环境（virtual environment）是一个独立的 Python 运行目录，拥有自己的 <code class="inline">site-packages</code> 和 Python 解释器副本。它能让不同项目使用互不干扰的依赖版本。Python 3.3+ 内置了 <code class="inline">venv</code> 模块，无需额外安装。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Bash</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-bash"># 1. 创建虚拟环境（会在当前目录生成 venv 文件夹）
+python -m venv venv
+
+# 2. 激活环境
+# macOS / Linux
+source venv/bin/activate
+# Windows (PowerShell)
+venv\Scripts\Activate.ps1
+
+# 激活后，命令行前缀会出现 (venv)
+# 此时 pip install 的包只装在当前环境
+
+# 3. 导出依赖列表
+pip freeze &gt; requirements.txt
+
+# 4. 在另一台机器/新环境中一键安装
+pip install -r requirements.txt
+
+# 5. 退出虚拟环境
+deactivate</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>记得把 <code class="inline">venv/</code> 目录加入 <code class="inline">.gitignore</code>，不要把虚拟环境提交到版本库。<code class="inline">requirements.txt</code> 则应随项目一起保存，方便他人复现环境。</p>
+        </div>
+
+        <p>如果你同时维护多个项目，频繁 <code class="inline">source .../activate</code> 会比较繁琐。社区有 <code class="inline">virtualenvwrapper</code> 这样的工具，它把每个虚拟环境集中管理，并提供 <code class="inline">mkvirtualenv</code>、<code class="inline">workon</code>、<code class="inline">deactivate</code> 等更简洁的命令：</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Bash</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-bash"># 安装 virtualenvwrapper（pip install 即可）
+pip install virtualenvwrapper
+
+# 创建并进入环境
+mkvirtualenv myproject
+
+# 在任意目录一键切换环境
+workon myproject
+
+# 退出
+deactivate
+
+# 删除环境
+rmvirtualenv myproject</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：环境与版本管理</div>
+          <p>Python 的 <code class="inline">venv</code> + <code class="inline">requirements.txt</code> 相当于 JS 世界的 <code class="inline">npm</code> + <code class="inline">package.json</code>：前者管理隔离的包目录，后者锁定依赖清单。而 <code class="inline">virtualenvwrapper</code> 则类似 <code class="inline">nvm</code>（Node Version Manager）——它帮你集中管理多个互相独立的运行环境，并快速切换。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS 中对应的工作流：用 package.json 锁定依赖
+// npm init -y 生成 package.json
+// npm install lodash  写入 dependencies
+
+// 全局安装 nvm 后可切换 Node 版本，类似 virtualenvwrapper
+// nvm use 18
+// nvm use 20
+
+// Python 的 requirements.txt  ≈  package-lock.json
+// 两者都用于"锁定环境、可复现构建"
+const deps = require("./package.json").dependencies;
+console.log(deps); // { lodash: "^4.17.21" }
+</code></pre>
+          </div>
+        </div>
+
+        <!-- requests -->
+        <h2 data-section="requests">requests — 优雅的 HTTP 客户端</h2>
+        <p><code class="inline">requests</code> 是 Python 中最流行的 HTTP 库，用人类可读的方式发起网络请求。使用前需先安装：<code class="inline">pip install requests</code>。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python"># 先执行: pip install requests
+import requests
+
+# GET 请求，通过 params 传递查询参数（自动 URL 编码）
+resp = requests.get(
+    "https://httpbin.org/get",
+    params={"q": "python", "page": 1},
+    timeout=5,  # 超时时间（秒），防止无限等待
+)
+
+# 响应状态码与内容
+print(resp.status_code)        # 200
+print(resp.url)                # 实际请求的完整 URL
+print(resp.text)               # 响应体原文（字符串）
+
+# 如果返回的是 JSON，直接用 .json() 解析为字典
+data = resp.json()
+print(data["args"])            # {'q': 'python', 'page': '1'}
+
+# POST 请求，用 json= 自动序列化并设置 Content-Type
+resp = requests.post(
+    "https://httpbin.org/post",
+    json={"username": "alice", "age": 25},
+    timeout=5,
+)
+print(resp.json()["json"])     # {'username': 'alice', 'age': 25}
+
+# 异常处理：网络问题、超时都会抛出 RequestException
+from requests.exceptions import RequestException
+try:
+    r = requests.get("https://example.com", timeout=3)
+    r.raise_for_status()  # 状态码非 2xx 时主动抛异常
+except RequestException as e:
+    print("请求失败:", e)</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：fetch 与 axios</div>
+          <p><code class="inline">requests.get(...)</code> 同步地返回响应对象，对应 JS 中的 <code class="inline">await fetch(...)</code> 或 <code class="inline">await axios.get(...)</code>。区别在于：Python 这里是阻塞式调用（线程会等待），而 JS 的 <code class="inline">fetch</code> 返回 Promise、需要 <code class="inline">await</code>。它们的理念一致——把 HTTP 请求变成简单的函数调用。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS: 用 axios 发起 GET（概念几乎等同 requests）
+import axios from "axios";
+
+const resp = await axios.get("https://httpbin.org/get", {
+  params: { q: "python", page: 1 },
+  timeout: 5000,
+});
+console.log(resp.status);   // 200
+console.log(resp.data);     // 直接就是解析好的对象
+
+// 原生 fetch 版本
+const r = await fetch("https://httpbin.org/get?q=python&page=1");
+const data = await r.json();
+</code></pre>
+          </div>
+        </div>
+
+        <!-- pillow -->
+        <h2 data-section="pillow">Pillow — 图像处理利器</h2>
+        <p><code class="inline">Pillow</code>（PIL 的现代分支）是 Python 处理图片的标准库。安装：<code class="inline">pip install Pillow</code>。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python"># 先执行: pip install Pillow
+from PIL import Image
+
+# 打开图片
+img = Image.open("photo.jpg")
+print(img.size)      # (宽, 高)，如 (1920, 1080)
+print(img.mode)      # 'RGB' / 'RGBA' / 'L' 等
+
+# 缩放：thumbnail 会就地修改并保持比例
+img.thumbnail((300, 300))
+img.save("photo_thumb.jpg")
+
+# 裁剪：传入 (左, 上, 右, 下) 像素坐标
+box = (100, 100, 400, 400)
+cropped = img.crop(box)
+cropped.save("cropped.png")
+
+# 旋转与格式转换
+rotated = img.rotate(45)
+rotated.save("rotated.webp")  # 也可直接改保存格式
+
+# 新建空白画布并合成
+canvas = Image.new("RGB", (500, 500), (255, 255, 255))
+canvas.paste(cropped, (50, 50))
+canvas.save("composite.jpg")</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p><code class="inline">img.thumbnail()</code> 会直接修改原对象且不返回新对象；而 <code class="inline">img.resize()</code> 会返回一个新的 <code class="inline">Image</code>。处理完后务必调用 <code class="inline">.save()</code>，否则修改只存在于内存中。</p>
+        </div>
+
+        <!-- chardet -->
+        <h2 data-section="chardet">chardet — 自动检测文本编码</h2>
+        <p>当你拿到一个未知来源的文本文件，不知道它是 UTF-8、GBK 还是其他编码时，<code class="inline">chardet</code> 可以帮你猜。安装：<code class="inline">pip install chardet</code>。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python"># 先执行: pip install chardet
+import chardet
+
+# 检测字节串的编码（注意要读二进制，不要预先解码）
+with open("unknown.txt", "rb") as f:
+    raw = f.read()
+
+result = chardet.detect(raw)
+print(result)
+# 例如: {'encoding': 'utf-8', 'confidence': 0.99, 'language': ''}
+
+# 用检测到的编码正确读取文本
+encoding = result["encoding"]
+with open("unknown.txt", encoding=encoding) as f:
+    text = f.read()
+print(text)</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p><code class="inline">detect()</code> 返回的 <code class="inline">confidence</code> 是置信度（0~1）。对于大文件，可先读取一小段（如前 1 万字节）来检测，既快又足够准确。</p>
+        </div>
+
+        <!-- psutil -->
+        <h2 data-section="psutil">psutil — 跨平台系统监控</h2>
+        <p><code class="inline">psutil</code> 能获取 CPU、内存、磁盘、网络以及进程信息，是写运维/监控脚本的好帮手。安装：<code class="inline">pip install psutil</code>。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python"># 先执行: pip install psutil
+import psutil
+
+# CPU 信息
+print(psutil.cpu_count())              # 逻辑核心数
+print(psutil.cpu_percent(interval=1))  # 1秒内的平均使用率(%)
+
+# 内存信息
+mem = psutil.virtual_memory()
+print(mem.total, mem.available, mem.percent)  # 总/可用/使用率%
+
+# 磁盘信息
+disk = psutil.disk_usage("/")
+print(f"磁盘使用率: {disk.percent}%")
+
+# 遍历进程
+for proc in psutil.process_iter(["pid", "name", "cpu_percent"]):
+    print(proc.info)
+    # 例如: {'pid': 1234, 'name': 'Python', 'cpu_percent': 0.0}
+
+# 找到名为 "chrome" 的进程并读取其内存占用
+for p in psutil.process_iter(["name", "memory_info"]):
+    if p.info["name"] == "chrome":
+        print(p.info["memory_info"].rss)  # 常驻内存字节数
+        break</code></pre>
+        </div>
+
+        <!-- Exercise -->
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>网页标题抓取器</strong> — 用 <code class="inline">requests</code> 抓取一个网页的 HTML，用字符串方法或正则提取 <code class="inline">&lt;title&gt;...&lt;/title&gt;</code> 中的标题并打印。</li>
+            <li><strong>批量缩略图生成</strong> — 遍历某个文件夹下的所有 <code class="inline">.jpg</code>，用 <code class="inline">Pillow</code> 统一缩放为 200×200 的缩略图，保存到 <code class="inline">thumbs/</code> 目录。</li>
+            <li><strong>系统监控脚本</strong> — 用 <code class="inline">psutil</code> 写一个脚本，每隔 5 秒打印一次 CPU 使用率和可用内存，持续 1 分钟。</li>
+            <li><strong>编码检测工具</strong> — 用 <code class="inline">chardet</code> 批量检测一个目录下所有 <code class="inline">.txt</code> 文件的编码，输出「文件名 → 编码 (置信度)」列表。</li>
+          </ol>
+        </div>
+
+        <!-- Chapter Navigation -->
+        <div class="chapter-nav">
+          <a href="../tutorials.html">
+            <span class="nav-label">← 返回目录</span>
+            <span class="nav-title">教程目录</span>
+          </a>
+          <a href="asyncio.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第十八章：异步 IO</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3>
+        <p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p>
+      </div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p>
+      <p>Built with HTML, CSS &amp; JavaScript · 内容参考廖雪峰 Python 教程体系</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十八章：异步 IO — Python 学习教程</title>
+  <meta name="description" content="Python 异步 IO 教程，学习 async/await 协程、事件循环、asyncio 任务并发与 aiohttp 异步网络请求。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <span>Python</span>
+      </a>
+      <button class="nav-toggle" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <!-- Sidebar -->
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#async-await" class="active">async/await</a></li>
+          <li><a href="#event-loop">事件循环</a></li>
+          <li><a href="#tasks">协程与任务</a></li>
+          <li><a href="#aiohttp">aiohttp</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a>
+          <span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a>
+          <span class="separator">/</span>
+          <span>异步 IO</span>
+        </div>
+
+        <h1>第十八章：异步 IO</h1>
+        <div class="chapter-meta">
+          <span>难度：高级</span>
+          <span>预计学习时间：1-2 周</span>
+          <span>前置知识：函数、并发基础</span>
+        </div>
+
+        <p>当程序需要同时等待多个网络请求、数据库查询或文件读写时，传统的"一个一个等"会非常慢。<code class="inline">asyncio</code> 是 Python 内置的异步 IO 框架：它在<strong>单线程</strong>内通过"协作式调度"实现并发——当一个协程在等待 IO 时，事件循环会立刻切换到另一个协程去干活。这种方式既避免了多线程的锁复杂度，又大幅提升了 IO 密集型任务的吞吐。</p>
+
+        <!-- async/await -->
+        <h2 data-section="async-await">async / await 协程</h2>
+        <p>用 <code class="inline">async def</code> 定义的函数称为<strong>协程函数</strong>，调用它不会立即执行，而是返回一个协程对象。在协程内部，用 <code class="inline">await</code> 挂起当前协程、把控制权交还事件循环，直到被等待的对象准备就绪。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">import asyncio
+import time
+
+# async def 定义协程函数
+async def say_after(delay, message):
+    await asyncio.sleep(delay)  # 挂起，期间事件循环可运行别的协程
+    print(message)
+
+# 直接调用只返回协程对象，并不执行
+coro = say_after(1, "hello")
+print(type(coro))  # &lt;class 'coroutine'&gt;
+
+# 必须放进事件循环里运行
+async def main():
+    await say_after(1, "世界")
+    await say_after(2, "你好")
+
+start = time.time()
+asyncio.run(main())  # 入口：创建事件循环并运行 main
+print(f"耗时约 {time.time() - start:.1f} 秒")  # 顺序执行约 3 秒</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：async/await（几乎一致！）</div>
+          <p>Python 的 <code class="inline">async def</code> / <code class="inline">await</code> 与 JavaScript 的写法<strong>几乎完全相同</strong>。两者都用 <code class="inline">async</code> 标记函数、用 <code class="inline">await</code> 暂停等待；区别仅在于 Python 用 <code class="inline">asyncio.run()</code> 启动事件循环，而 JS 的 <code class="inline">async</code> 函数由引擎自动调度。心智模型可以完全通用。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS 中的 async/await —— 与 Python 同构
+function sleep(ms) {
+  return new Promise((resolve) =&gt; setTimeout(resolve, ms));
+}
+
+async function sayAfter(delay, message) {
+  await sleep(delay * 1000); // 挂起，释放主线程
+  console.log(message);
+}
+
+async function main() {
+  await sayAfter(1, "世界");
+  await sayAfter(2, "你好");
+}
+
+main(); // JS 引擎自动驱动事件循环
+</code></pre>
+          </div>
+        </div>
+
+        <!-- event loop -->
+        <h2 data-section="event-loop">事件循环</h2>
+        <p><strong>事件循环（event loop）</strong>是 asyncio 的"发动机"：它不断检查哪些协程可以继续执行，并在 IO 就绪时唤醒它们。<code class="inline">asyncio.run()</code> 会创建一个新事件循环、运行传入的协程、结束后自动关闭循环。日常开发中你几乎不需要手动管理它。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">import asyncio
+
+async def task(name):
+    print(f"{name} 开始")
+    await asyncio.sleep(1)
+    print(f"{name} 结束")
+
+# 方式一（推荐）：asyncio.run 自动管理循环生命周期
+async def main():
+    await task("A")
+
+asyncio.run(main())
+
+# 方式二：手动获取并驱动循环（了解即可）
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+try:
+    loop.run_until_complete(task("B"))
+finally:
+    loop.close()
+
+# 在一个循环里顺序运行多个协程
+async def run_all():
+    await asyncio.gather(task("X"), task("Y"))
+asyncio.run(run_all())</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>在 Jupyter Notebook、Web 框架（如 FastAPI）等环境中，事件循环可能已经存在，此时不应再调用 <code class="inline">asyncio.run()</code>，否则会报"事件循环已关闭"等错误。直接用 <code class="inline">await</code> 即可。</p>
+        </div>
+
+        <!-- tasks -->
+        <h2 data-section="tasks">协程与任务并发</h2>
+        <p>单纯用 <code class="inline">await</code> 是顺序执行的。要真正并发，需要把协程包装成<strong>任务（Task）</strong>：<code class="inline">asyncio.create_task()</code> 会立即把协程排入事件循环并"同时"开始；<code class="inline">asyncio.gather()</code> 则可一次性等待多个协程全部完成。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">import asyncio
+import time
+
+async def job(n):
+    await asyncio.sleep(1)  # 模拟 IO 等待
+    return f"任务{n}完成"
+
+async def main():
+    # create_task：三个任务"同时"启动，总耗时≈1秒而非3秒
+    t1 = asyncio.create_task(job(1))
+    t2 = asyncio.create_task(job(2))
+    t3 = asyncio.create_task(job(3))
+
+    # 等待各自结果
+    r1 = await t1
+    r2 = await t2
+    r3 = await t3
+    print(r1, r2, r3)
+
+    # gather：更简洁地并发并收集结果（保持顺序）
+    results = await asyncio.gather(job(4), job(5), job(6))
+    print(results)  # ['任务4完成', '任务5完成', '任务6完成']
+
+start = time.time()
+asyncio.run(main())
+print(f"总耗时约 {time.time() - start:.1f} 秒")  # 约 1 秒</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：Promise.all</div>
+          <p><code class="inline">asyncio.gather()</code> 等价于 JS 的 <code class="inline">Promise.all()</code>：都用于并发启动多个异步任务并等待它们全部完成，且结果按输入顺序返回。Python 的 <code class="inline">create_task</code> 则类似 <code class="inline">Promise</code> 构造函数——把异步操作"登记"进调度器。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS: Promise.all 并发等待多个异步任务
+function job(n) {
+  return new Promise((resolve) =&gt;
+    setTimeout(() =&gt; resolve(`任务${n}完成`), 1000)
+  );
+}
+
+async function main() {
+  const results = await Promise.all([job(1), job(2), job(3)]);
+  console.log(results); // ["任务1完成", "任务2完成", "任务3完成"]
+}
+main();
+</code></pre>
+          </div>
+        </div>
+
+        <!-- aiohttp -->
+        <h2 data-section="aiohttp">aiohttp — 异步 HTTP 请求</h2>
+        <p>标准库 <code class="inline">requests</code> 是阻塞式的，在 asyncio 中应使用异步客户端 <code class="inline">aiohttp</code>。它的 <code class="inline">ClientSession</code> 配合 <code class="inline">await</code> 能在等待网络响应时让出控制权，从而并发抓取多个网页。安装：<code class="inline">pip install aiohttp</code>。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python"># 先执行: pip install aiohttp
+import asyncio
+import aiohttp
+
+async def fetch(session, url):
+    async with session.get(url, timeout=aiohttp.ClientTimeout(total=5)) as resp:
+        print(f"{url} -> {resp.status}")
+        return await resp.text()
+
+async def main():
+    urls = [
+        "https://httpbin.org/get",
+        "https://example.com",
+        "https://python.org",
+    ]
+    # ClientSession 复用连接，推荐用 async with 管理
+    async with aiohttp.ClientSession() as session:
+        # gather 并发发起所有请求，总耗时≈最慢那一个
+        pages = await asyncio.gather(*(fetch(session, u) for u in urls))
+        print(f"共抓取 {len(pages)} 个页面")
+
+asyncio.run(main())</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>不要在协程里混用阻塞的 <code class="inline">requests.get()</code>，它会卡住整个事件循环，使并发化为乌有。异步代码里务必使用 <code class="inline">aiohttp</code>、<code class="inline">asyncpg</code>、<code class="inline">aiomysql</code> 等原生支持 <code class="inline">await</code> 的库。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：fetch + await</div>
+          <p><code class="inline">aiohttp.ClientSession.get()</code> + <code class="inline">await</code> 与浏览器里的 <code class="inline">fetch()</code> + <code class="inline">await</code> 概念一致：都是异步发起 HTTP 请求、在响应就绪前让出控制权。两者都是"非阻塞 IO"思维的直接体现。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS 浏览器/Node: fetch + await 异步请求
+async function fetchAll(urls) {
+  const promises = urls.map((u) =&gt;
+    fetch(u).then((r) =&gt; {
+      console.log(u, "->", r.status);
+      return r.text();
+    })
+  );
+  const pages = await Promise.all(promises); // 并发抓取
+  console.log(`共抓取 ${pages.length} 个页面`);
+}
+fetchAll(["https://example.com", "https://python.org"]);
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Exercise -->
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>并发抓取多个 URL</strong> — 用 <code class="inline">aiohttp</code> + <code class="inline">asyncio.gather</code> 同时抓取 5 个不同网页，统计每个页面的字节数并总耗时。</li>
+            <li><strong>gather 示例</strong> — 写 3 个参数不同的协程任务（如模拟下载、转码、上传），用 <code class="inline">gather</code> 并发运行，观察总耗时是否约等于最慢单项。</li>
+            <li><strong>异步计时器</strong> — 用 <code class="inline">asyncio.sleep</code> 实现一个每秒打印一次当前时间的异步协程，运行 10 秒后自动退出。</li>
+            <li><strong>aiohttp 实战</strong> — 用 <code class="inline">aiohttp</code> 向 <code class="inline">https://httpbin.org/post</code> 并发发送多个带不同 JSON 体的 POST 请求，并打印各自返回的 <code class="inline">json</code> 字段。</li>
+          </ol>
+        </div>
+
+        <!-- Chapter Navigation -->
+        <div class="chapter-nav">
+          <a href="concurrency.html">
+            <span class="nav-label">← 上一章</span>
+            <span class="nav-title">第十六章：进程与线程</span>
+          </a>
+          <a href="web-flask.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第十九章：Web 开发实战</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3>
+        <p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p>
+      </div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p>
+      <p>Built with HTML, CSS &amp; JavaScript · 内容参考廖雪峰 Python 教程体系</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

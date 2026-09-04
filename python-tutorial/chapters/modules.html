@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第八章：模块与包管理 — Python 学习教程</title>
+  <meta name="description" content="Python模块与包管理教程，学习模块的导入方式、__name__惯用法、包与__init__.py、pip依赖管理与虚拟环境。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <span>Python</span>
+      </a>
+      <button class="nav-toggle" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <!-- Sidebar -->
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#module" class="active">模块基础</a></li>
+          <li><a href="#import">导入方式</a></li>
+          <li><a href="#package">包与 __init__</a></li>
+          <li><a href="#pip">pip 与依赖</a></li>
+          <li><a href="#venv">虚拟环境</a></li>
+          <li><a href="#future">__future__</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a>
+          <span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a>
+          <span class="separator">/</span>
+          <span>模块与包管理</span>
+        </div>
+
+        <h1>第八章：模块与包管理</h1>
+        <div class="chapter-meta">
+          <span>难度：进阶</span>
+          <span>预计学习时间：1 周</span>
+          <span>前置知识：函数基础</span>
+        </div>
+
+        <p>当程序越来越长，把所有代码塞进一个文件既难维护又容易出错。Python 用「模块」和「包」来组织代码，再配合 <code class="inline">pip</code> 与虚拟环境管理第三方依赖。本章带你掌握工程化开发中最关键的几项技能。</p>
+
+        <!-- Module basics -->
+        <h2 data-section="module">模块基础</h2>
+        <p>在 Python 中，<strong>一个 .py 文件就是一个模块</strong>。模块名就是文件名（不含 .py）。通过 <code class="inline">import</code> 可以把别的模块引入当前文件，从而复用其中的函数、类和变量。解释器在第一次 <code class="inline">import</code> 时执行模块顶层代码，之后再次导入<strong>不会重复执行</strong>。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python"># greeting.py —— 一个最简单的模块
+def greet(name):
+    return f"你好, {name}!"
+
+pi = 3.14159
+
+# 惯用法：只有直接运行本文件时，__name__ 才等于 "__main__"
+if __name__ == "__main__":
+    print(greet("Python"))
+    print("这是模块内部测试代码，被 import 时不会执行")
+
+
+# 另一个文件中：模块顶层代码只执行一次
+import greeting          # 打印一次问候
+import greeting          # 第二次导入，什么也不会打印
+print(greeting.pi)       # 3.14159
+</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>把可执行逻辑放进 <code class="inline">if __name__ == "__main__":</code> 块，是 Python 社区的标准写法。这样模块既能作为脚本直接运行做自测，又能被安全地 import 而不触发副作用。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：模块与导出</div>
+          <p>Python 的 .py 文件天然就是模块，用 <code class="inline">import</code> 引入；这对应 JS 的 ES Module：一个 .js 文件就是一个模块，通过 <code class="inline">export</code> 暴露接口、<code class="inline">import</code> 引入。两者都遵循「一个文件一个模块、用导入复用」的思想。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// mathUtils.js —— ES Module
+export const pi = 3.14159;
+export function greet(name) {
+  return `你好, ${name}!`;
+}
+
+// 入口文件 main.js
+import { greet } from "./mathUtils.js";
+console.log(greet("JavaScript"));  // 模块只会被求值一次
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Import styles -->
+        <h2 data-section="import">导入方式</h2>
+        <p>Python 提供多种导入写法，满足不同粒度的复用需求。核心原则：<strong>明确比隐式更好</strong>，尽量导入需要的名字，而不是把整个命名空间搬进来。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python"># 方式一：整体导入，使用时加前缀
+import math
+print(math.sqrt(16))     # 4.0
+
+# 方式二：导入指定成员，直接使用名字
+from math import pi, sin
+print(pi)                # 3.141592653589793
+
+# 方式三：使用别名，避免名字冲突或简化长名
+import numpy as np
+import datetime as dt
+
+# 不推荐：通配符导入会污染命名空间，难追踪来源
+from math import *       # 可能悄悄覆盖已有名称
+</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p><code class="inline">from xxx import *</code> 会把模块里所有公开名字（以及 <code class="inline">__all__</code> 列出的名字）一股脑塞进当前作用域，既容易命名冲突，又让代码可读性变差。生产代码请避免使用。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：命名导入</div>
+          <p>Python 的 <code class="inline">from math import pi, sin</code> 对应 JS 的命名导入 <code class="inline">import { pi, sin } from "mathjs"</code>；<code class="inline">import math</code> 对应 <code class="inline">import * as math</code> 的命名空间导入。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// 命名导入，对应 Python 的 from math import pi, sin
+import { pi, sin } from "mathjs";
+
+// 命名空间导入，对应 Python 的 import math
+import * as math from "mathjs";
+console.log(math.sqrt(16));  // 4
+
+// 默认导入 + 别名
+import { default as _ } from "lodash";
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Package -->
+        <h2 data-section="package">包与 __init__</h2>
+        <p>当模块变多，可以用「包」把相关模块组织进目录。一个包含 <code class="inline">__init__.py</code> 文件的目录就是一个包。<code class="inline">__init__.py</code> 本身也是模块（包的名字即它），常用来做包级初始化。<code class="inline">__all__</code> 则控制 <code class="inline">from 包 import *</code> 时导出的内容。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python"># 包结构示例：
+# mymath/
+#   __init__.py
+#   basic.py
+#   advanced.py
+
+# mymath/__init__.py —— 定义包对外导出的名字
+__all__ = ["add", "subtract", "power"]
+
+from .basic import add, subtract
+from .advanced import power
+
+# mymath/basic.py
+def add(a, b):
+    return a + b
+
+def subtract(a, b):
+    return a - b
+
+# mymath/advanced.py —— 相对导入：. 表示当前包
+from .basic import add
+
+def power(base, exp):
+    result = 1
+    for _ in range(exp):
+        result = add(result * base if result != 1 else base, 0)
+    return base ** exp
+</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>相对导入用 <code class="inline">.</code> 表示当前包、<code class="inline">..</code> 表示上一级包，只能在包内部使用，且包要通过 <code class="inline">import</code> 方式加载（不能直接作为脚本运行）。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：目录模块与 package.json</div>
+          <p>Python 的「包目录 + <code class="inline">__init__.py</code>」对应 Node.js 的「目录 + <code class="inline">package.json</code>」。<code class="inline">__init__.py</code> 的 <code class="inline">__all__</code> 相当于 <code class="inline">package.json</code> 的 <code class="inline">exports</code> 字段，声明对外暴露的入口。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// Node.js 中一个目录 + package.json 即是一个"包"
+// package.json
+{
+  "name": "mymath",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  }
+}
+
+// index.js —— 聚合导出，等价于 Python 的 __init__.py
+export { add, subtract } from "./basic.js";
+export { power } from "./advanced.js";
+</code></pre>
+          </div>
+        </div>
+
+        <!-- pip -->
+        <h2 data-section="pip">pip 与依赖</h2>
+        <p><code class="inline">pip</code> 是 Python 的包安装器。它从 PyPI（Python 包索引）下载并安装第三方库。把项目的依赖固化到 <code class="inline">requirements.txt</code>，可以让别人一键复现你的运行环境。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Bash</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-bash"># 安装最新版包
+pip install requests
+
+# 安装指定版本
+pip install requests==2.31.0
+
+# 导出当前环境所有依赖到 requirements.txt
+pip freeze &gt; requirements.txt
+
+# 根据清单安装依赖
+pip install -r requirements.txt
+</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：npm install 与 package.json</div>
+          <p><code class="inline">pip install</code> 对应 <code class="inline">npm install</code>，<code class="inline">requirements.txt</code> 对应 <code class="inline">package.json</code> 的依赖清单。两者都解决了「记录并复现第三方依赖」的问题。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// package.json —— npm 的依赖清单，等价于 Python 的 requirements.txt
+{
+  "name": "my-project",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
+</code></pre>
+          </div>
+        </div>
+
+        <!-- venv -->
+        <h2 data-section="venv">虚拟环境</h2>
+        <p>不同项目可能需要同一库的不同版本。虚拟环境为每个项目创建隔离的 Python 运行空间，避免全局安装互相污染。<code class="inline">python -m venv</code> 是官方推荐工具。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Bash</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-bash"># 在项目目录下创建虚拟环境
+python -m venv .venv
+
+# 激活虚拟环境（Windows）
+.venv\Scripts\activate
+
+# 激活虚拟环境（macOS / Linux）
+source .venv/bin/activate
+
+# 安装依赖只会影响当前环境
+pip install requests
+
+# 退出虚拟环境
+deactivate
+</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：node_modules 与 nvm</div>
+          <p>Python 的虚拟环境隔离整套解释器与依赖，类似于 Node 项目用 <code class="inline">node_modules</code> 隔离依赖、用 <code class="inline">nvm</code> 切换 Node 版本（等价于 <code class="inline">pyenv</code> / venv 的组合）。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// Node 默认把依赖装进项目下的 node_modules/
+// 等价于 Python venv 的"每个项目独立环境"
+const path = require("path");
+console.log(path.resolve("node_modules"));  // 项目级依赖目录
+</code></pre>
+          </div>
+        </div>
+
+        <!-- __future__ -->
+        <h2 data-section="future">__future__ 新特性兼容</h2>
+        <p><code class="inline">__future__</code> 模块让你在当前 Python 版本中提前使用将在未来成为默认行为的新特性。最常见的用法是 <code class="inline">from __future__ import annotations</code>，它让类型注解延迟求值，从而支持前向引用、减少运行时开销。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python"># 让类型注解延迟求值（Python 3.7+ 推荐）
+from __future__ import annotations
+
+def add(a: int, b: int) -&gt; int:
+    return a + b
+
+# annotations 开启后，注解不会立即求值，支持前向引用
+class Node:
+    def add_child(self, node: "Node") -&gt; None:
+        ...
+
+# 历史上：从 Python 2 平滑迁移到 Python 3 的除法语义
+from __future__ import division
+print(1 / 2)    # 0.5（在 Python 2 中原本是 0）
+</code></pre>
+        </div>
+
+        <!-- Exercise -->
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>写一个计算器模块</strong> — 创建 <code class="inline">calculator.py</code>，实现加、减、乘、除四个函数，并在 <code class="inline">if __name__ == "__main__":</code> 块中写一段自测代码，验证函数正确性。</li>
+            <li><strong>组织成包并控制导出</strong> — 把多个功能模块放进一个包（带 <code class="inline">__init__.py</code>），用 <code class="inline">__all__</code> 约束 <code class="inline">from 包 import *</code> 只导出指定名字。</li>
+            <li><strong>用 venv 建立项目环境</strong> — 新建目录，用 <code class="inline">python -m venv</code> 创建并激活虚拟环境，安装一个第三方库（如 <code class="inline">requests</code>）验证隔离效果。</li>
+            <li><strong>导出依赖清单</strong> — 在上一步的虚拟环境中执行 <code class="inline">pip freeze &gt; requirements.txt</code>，然后把该文件交给他人，验证对方能一键复现环境。</li>
+          </ol>
+        </div>
+
+        <!-- Chapter Navigation -->
+        <div class="chapter-nav">
+          <a href="../tutorials.html">
+            <span class="nav-label">← 返回目录</span>
+            <span class="nav-title">教程目录</span>
+          </a>
+          <a href="oop.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第九章：面向对象编程</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3>
+        <p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p>
+      </div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p>
+      <p>Built with HTML, CSS &amp; JavaScript · 内容参考廖雪峰 Python 教程体系</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

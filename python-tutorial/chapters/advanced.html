@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第六章：高级特性（切片/迭代/生成器） — Python 学习教程</title>
+  <meta name="description" content="Python高级特性教程，深入讲解切片、迭代、列表生成式、生成器和迭代器的原理与用法，提升代码简洁度与性能。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <span>Python</span>
+      </a>
+      <button class="nav-toggle" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <!-- Sidebar -->
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#slice" class="active">切片</a></li>
+          <li><a href="#iterate">迭代</a></li>
+          <li><a href="#comprehension">列表生成式</a></li>
+          <li><a href="#generator">生成器</a></li>
+          <li><a href="#iterator">迭代器</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a>
+          <span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a>
+          <span class="separator">/</span>
+          <span>高级特性</span>
+        </div>
+
+        <h1>第六章：高级特性（切片 / 迭代 / 生成器）</h1>
+        <div class="chapter-meta">
+          <span>难度：进阶</span>
+          <span>预计学习时间：1-2 周</span>
+          <span>前置知识：控制流、函数基础</span>
+        </div>
+
+        <p>掌握基础语法后，Python 真正迷人的部分才刚开始。本章介绍几个能大幅简化代码、提升可读性的高级特性：切片让你优雅地截取序列，迭代统一了遍历方式，生成式一行搞定数据变换，而生成器与迭代器则让"惰性计算"成为可能，优雅地处理海量数据。</p>
+
+        <!-- Slice -->
+        <h2 data-section="slice">切片</h2>
+        <p>列表、字符串、元组等序列都支持切片（slice）：<code class="inline">[start:stop:step]</code>。它返回原序列的一个<strong>子区间</strong>副本，区间左闭右开，即包含 <code class="inline">start</code> 但<strong>不包含</strong> <code class="inline">stop</code>。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">seq = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+print(seq[2:5])      # [2, 3, 4] — 从索引2取到(不含)5
+print(seq[:3])       # [0, 1, 2] — 省略 start，从头开始
+print(seq[7:])       # [7, 8, 9] — 省略 stop，取到末尾
+print(seq[::2])      # [0, 2, 4, 6, 8] — 步长2，隔一个取
+print(seq[::-1])     # [9, 8, 7, ..., 0] — 负步长，反转序列
+
+# 字符串同样适用
+s = "Hello, Python"
+print(s[7:13])       # 'Python'
+print(s[::-1])       # 'nohtyP ,olleH'</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：数组切片</div>
+          <p>Python 的 <code class="inline">seq[start:stop]</code> 与 JS 的 <code class="inline">arr.slice(start, stop)</code> 含义一致，都是左闭右开、返回副本不修改原数组。不过 JS 没有内建的"步长"参数，需要反转时得用 <code class="inline">arr.slice().reverse()</code> 组合。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">const seq = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+console.log(seq.slice(2, 5));        // [2, 3, 4]
+console.log(seq.slice(7));            // [7, 8, 9]
+console.log([...seq].reverse());      // [9, 8, ..., 0]
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Iterate -->
+        <h2 data-section="iterate">迭代</h2>
+        <p>Python 用 <code class="inline">for ... in</code> 统一遍历一切"可迭代对象"（iterable），包括列表、字符串、字典、文件等。<code class="inline">isinstance(x, Iterable)</code> 可以判断某对象是否可迭代，判断时记得从 <code class="inline">collections.abc</code> 导入类型。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">from collections.abc import Iterable
+
+# 遍历列表
+fruits = ["apple", "banana", "cherry"]
+for f in fruits:
+    print(f)
+
+# 判断可迭代
+print(isinstance(fruits, Iterable))   # True
+print(isinstance(123, Iterable))      # False
+
+# enumerate 同时拿到索引和值
+for i, f in enumerate(fruits):
+    print(i, f)                       # 0 apple / 1 banana / 2 cherry
+
+# 遍历字典
+scores = {"Alice": 95, "Bob": 88}
+for name, score in scores.items():
+    print(name, score)</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：for...of 与迭代协议</div>
+          <p>Python 的 <code class="inline">for ... in</code> 对应 JS 的 <code class="inline">for...of</code>，两者都基于"迭代协议"：任何实现了 <code class="inline">[Symbol.iterator]()</code>（JS）/ 具有 <code class="inline">__iter__</code>（Python）的对象都能被遍历。Python 的 <code class="inline">enumerate</code> 类似 JS 的 <code class="inline">arr.entries()</code>。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">const fruits = ["apple", "banana", "cherry"];
+for (const f of fruits) console.log(f);
+
+for (const [i, f] of fruits.entries()) {
+  console.log(i, f);          // 类似 Python 的 enumerate
+}
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Comprehension -->
+        <h2 data-section="comprehension">列表生成式</h2>
+        <p>列表生成式（list comprehension）用一行代码完成"遍历 + 变换 + 过滤"，比手写 <code class="inline">for</code> 循环更简洁，性能也更好。字典、集合同样支持生成式。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python"># 基础：0~9 的平方
+squares = [x * x for x in range(10)]
+print(squares)              # [0, 1, 4, 9, ..., 81]
+
+# 带 if 过滤：只保留偶数的平方
+even_sq = [x * x for x in range(10) if x % 2 == 0]
+print(even_sq)              # [0, 4, 16, 36, 64]
+
+# 字典生成式
+names = ["Alice", "Bob"]
+age_map = {name: len(name) for name in names}
+print(age_map)              # {'Alice': 5, 'Bob': 3}
+
+# 集合生成式（自动去重）
+chars = {c for c in "hello"}
+print(chars)                # {'h', 'e', 'l', 'o'}
+
+# 嵌套：生成 (i, j) 组合
+pairs = [(i, j) for i in range(2) for j in range(2)]
+print(pairs)                # [(0, 0), (0, 1), (1, 0), (1, 1)]</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：map / filter 链式</div>
+          <p>Python 列表生成式 <code class="inline">[f(x) for x in it if cond]</code> ≈ JS 的 <code class="inline">it.map(f).filter(cond)</code>。区别是列表生成式在<strong>一条语句里</strong>完成变换与过滤，而 JS 通常链式调用多个方法；JS 不会就地去重，集合生成式则对应 JS 的 <code class="inline">new Set(...)</code>。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">const squares = Array.from({ length: 10 }, (_, x) =&gt; x * x);
+const evenSq = squares.filter(x =&gt; x % 2 === 0);
+
+// 集合去重
+const chars = new Set("hello");
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Generator -->
+        <h2 data-section="generator">生成器</h2>
+        <p>生成器（generator）用 <code class="inline">yield</code> 关键字定义，调用时返回一个<strong>惰性计算</strong>的对象，每次请求下一个值才计算一个，从而<strong>省内存</strong>。生成器表达式 <code class="inline">(x*x for x in range(10))</code> 语法类似列表生成式，但用圆括号，不立即占用空间。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python"># 生成器表达式（惰性，不一次性生成所有元素）
+gen = (x * x for x in range(10))
+print(next(gen))            # 0
+print(next(gen))            # 1
+# 用 for 消费完剩余元素
+for v in gen:
+    print(v)                # 4 9 ... 81
+
+# 用 yield 定义生成器函数
+def fib(max_n):
+    a, b = 0, 1
+    for _ in range(max_n):
+        yield a
+        a, b = b, a + b
+
+print(list(fib(10)))        # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+
+# 对比：若用列表保存前 100 万个斐波那契数会占用大量内存
+# 生成器则按需计算，几乎不占内存</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：function* 与 yield</div>
+          <p>Python 的 <code class="inline">def ... yield</code> 与 JS 的 <code class="inline">function*</code> 生成器几乎一模一样：都用 <code class="inline">yield</code> 暂停并产出值，都用 <code class="inline">.next()</code> 推进。两者都体现了"惰性/按需计算"的思想。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">function* fib(maxN) {
+  let a = 0, b = 1;
+  for (let i = 0; i &lt; maxN; i++) {
+    yield a;
+    [a, b] = [b, a + b];
+  }
+}
+const g = fib(10);
+console.log(g.next().value);   // 0
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Iterator -->
+        <h2 data-section="iterator">迭代器</h2>
+        <p>区分两个概念：<strong>可迭代对象（Iterable）</strong>是能用 <code class="inline">for</code> 遍历的对象；<strong>迭代器（Iterator）</strong>是实现了 <code class="inline">__next__()</code> 的对象，每次返回下一个值，没有更多值时抛出 <code class="inline">StopIteration</code>。可迭代对象通过 <code class="inline">iter()</code> 变成迭代器。实际上，<code class="inline">for</code> 循环的本质就是不断调用迭代器的 <code class="inline">next()</code>。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">from collections.abc import Iterable, Iterator
+
+lst = [1, 2, 3]
+print(isinstance(lst, Iterable))   # True — 列表可迭代
+print(isinstance(lst, Iterator))   # False — 但它本身不是迭代器
+
+it = iter(lst)                     # 用 iter() 取得迭代器
+print(isinstance(it, Iterator))    # True
+print(next(it))                    # 1
+print(next(it))                    # 2
+print(next(it))                    # 3
+# print(next(it))                  # 再调用会抛 StopIteration
+
+# 手动模拟 for 循环的本质
+it2 = iter(lst)
+while True:
+    try:
+        v = next(it2)
+        print(v)
+    except StopIteration:
+        break</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：Iterator 协议</div>
+          <p>JS 的迭代器协议与 Python 高度一致：对象需实现 <code class="inline">next()</code> 方法，返回 <code class="inline">{ value, done }</code>。当 <code class="inline">done</code> 为 true 时停止——这正对应 Python 的 <code class="inline">StopIteration</code>。JS 用 <code class="inline">[Symbol.iterator]()</code> 取得迭代器，对应 Python 的 <code class="inline">iter()</code>。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+              <pre><code class="language-javascript">const it = [1, 2, 3][Symbol.iterator]();
+console.log(it.next());   // { value: 1, done: false }
+console.log(it.next());   // { value: 2, done: false }
+console.log(it.next());   // { value: 3, done: false }
+console.log(it.next());   // { value: undefined, done: true }
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Exercise -->
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>反转字符串</strong> — 用切片 <code class="inline">[::-1]</code> 写一个函数，输入任意字符串，返回反转后的结果。</li>
+            <li><strong>偶数生成器</strong> — 写一个生成器函数，用 <code class="inline">yield</code> 依次产生前 N 个偶数（0, 2, 4, ...），并验证用 <code class="inline">next()</code> 取值。</li>
+            <li><strong>筛选平方数</strong> — 用列表生成式从 1 到 30 中筛选出那些平方仍然在范围内的数（或实现"平方后仍是偶数"的过滤），打印结果。</li>
+            <li><strong>自定义可迭代类</strong> — 定义一个类，实现 <code class="inline">__iter__</code> 与 <code class="inline">__next__</code>，使其能用 <code class="inline">for</code> 循环依次输出 0 到 4，并在第 5 次抛出 <code class="inline">StopIteration</code>。</li>
+          </ol>
+        </div>
+
+        <!-- Chapter Navigation -->
+        <div class="chapter-nav">
+          <a href="../tutorials.html">
+            <span class="nav-label">← 返回目录</span>
+            <span class="nav-title">教程目录</span>
+          </a>
+          <a href="functional.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第七章：函数式编程</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3>
+        <p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p>
+      </div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p>
+      <p>Built with HTML, CSS &amp; JavaScript · 内容参考廖雪峰 Python 教程体系</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

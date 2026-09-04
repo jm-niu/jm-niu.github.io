@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二章：基础语法 — Python 学习教程</title>
+  <meta name="description" content="Python基础语法深度教程：变量与引用、运算符、字符串与编码、类型转换、输入输出，含分步骤讲解、真实场景案例与示意图。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo"><span>Python</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#variables" class="active">变量与赋值</a></li>
+          <li><a href="#datatypes">基本数据类型</a></li>
+          <li><a href="#operators">运算符</a></li>
+          <li><a href="#strings">字符串操作</a></li>
+          <li><a href="#conversion">类型转换</a></li>
+          <li><a href="#io">输入与输出</a></li>
+          <li><a href="#encoding">字符编码与字符串</a></li>
+          <li><a href="#style">注释与代码风格</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a><span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a><span class="separator">/</span>
+          <span>基础语法</span>
+        </div>
+
+        <h1>第二章：基础语法</h1>
+        <div class="chapter-meta">
+          <span>难度：入门</span>
+          <span>预计学习时间：2-3 周</span>
+          <span>前置知识：环境搭建</span>
+        </div>
+
+        <p>欢迎来到 Python 编程的世界！本章将带你了解 Python 最基础的语法元素：变量如何"指向"数据、五种基本数据类型、丰富的运算符、字符串操作、类型转换以及输入输出。这些是后续所有章节的基石。我们会<strong>从"为什么是这样"讲起，配合可运行代码、真实场景和示意图</strong>，帮你建立扎实且直观的理解，而不是死记硬背。</p>
+
+        <div class="path-hint">
+          <span class="path-chip">理解"变量是引用"</span>
+          <span class="path-chip">掌握 5 种基本类型</span>
+          <span class="path-chip">用运算符做计算与比较</span>
+          <span class="path-chip">字符串格式化与编码</span>
+        </div>
+
+        <h2 data-section="variables" id="variables">变量与赋值</h2>
+        <p>在 Python 中，变量不需要声明类型，直接赋值即可创建。但需要建立一个关键心智模型：<strong>Python 的变量不是"装数据的盒子"，而是"贴在数据上的标签"</strong>。变量名指向内存中的对象，赋值只是让标签指向新的对象。理解了这一点，很多"反直觉"的行为（如两个变量互相影响）就迎刃而解了。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 变量赋值 — 无需声明类型
+name = "Alice"
+age = 25
+height = 1.68
+is_student = True
+
+# 多重赋值
+a, b, c = 1, 2, 3
+
+# 交换变量值 — 不需要临时变量
+a, b = b, a
+
+# 查看变量类型
+print(type(name))       # &lt;class 'str'&gt;
+print(type(age))        # &lt;class 'int'&gt;
+print(type(height))      # &lt;class 'float'&gt;</code></pre>
+        </div>
+
+        <h3>从零掌握变量：4 个步骤</h3>
+        <ul class="steps">
+          <li class="step-item">
+            <h4>创建变量</h4>
+            <p><code class="inline">x = 10</code> 做了两件事：在内存创建整数对象 10，再让标签 <code class="inline">x</code> 指向它。无需任何类型声明。</p>
+          </li>
+          <li class="step-item">
+            <h4>重新绑定</h4>
+            <p><code class="inline">x = 20</code> 不是"把 10 改成 20"，而是让 <code class="inline">x</code> 改指向新对象 20；原来的 10 若无人引用会被垃圾回收。</p>
+          </li>
+          <li class="step-item">
+            <h4>共享与别名</h4>
+            <p><code class="inline">y = x</code> 让 y 和 x 指向<strong>同一个对象</strong>。若是可变对象，改一方另一方可见（详见数据类型章"可变 vs 不可变"）。</p>
+          </li>
+          <li class="step-item">
+            <h4>解包赋值</h4>
+            <p>用 <code class="inline">a, b = b, a</code> 一行交换；用 <code class="inline">a, b, *rest = 序列</code> 可同时取头和剩余部分。</p>
+          </li>
+        </ul>
+
+        <div class="figure">
+          <svg viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <defs>
+              <marker id="arVar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#3776AB"/></marker>
+            </defs>
+            <rect x="20" y="55" width="70" height="40" rx="6" fill="#eef6ff" stroke="#3776AB" stroke-width="2"/>
+            <text x="55" y="80" text-anchor="middle" font-size="13" fill="#2c3e50">name</text>
+            <line x1="90" y1="75" x2="180" y2="75" stroke="#3776AB" stroke-width="2" marker-end="url(#arVar)"/>
+            <rect x="180" y="55" width="120" height="40" rx="6" fill="#fff" stroke="#27ae60" stroke-width="2"/>
+            <text x="240" y="80" text-anchor="middle" font-size="13" fill="#2c3e50">"Alice"（对象）</text>
+            <rect x="360" y="55" width="70" height="40" rx="6" fill="#eef6ff" stroke="#3776AB" stroke-width="2"/>
+            <text x="395" y="80" text-anchor="middle" font-size="13" fill="#2c3e50">age</text>
+            <line x1="430" y1="75" x2="500" y2="75" stroke="#3776AB" stroke-width="2" marker-end="url(#arVar)"/>
+            <rect x="500" y="55" width="50" height="40" rx="6" fill="#fff" stroke="#27ae60" stroke-width="2"/>
+            <text x="525" y="80" text-anchor="middle" font-size="13" fill="#2c3e50">25</text>
+          </svg>
+          <p class="figure-caption">示意图：变量是"标签"而非"盒子" —— <code class="inline">name</code> 只是指向字符串对象 <code class="inline">"Alice"</code> 的引用，真正的对象存放在内存中。</p>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：用变量描述一笔订单</div>
+          <p>真实业务里，一组相关的变量往往组织在一起，体现"数据即状态"的思想：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">order_id = "NO20260101"
+items = ["键盘", "鼠标"]
+total = 199.0
+paid = False
+
+# 支付后改变状态（重新绑定标签）
+paid = True
+status = "已支付" if paid else "待支付"
+print(f"订单 {order_id} 状态：{status}")</code></pre>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>Python 变量命名遵循 PEP 8 规范：使用小写字母 + 下划线 (snake_case)，如 <code class="inline">user_name</code>、<code class="inline">total_count</code>。常量用全大写：<code class="inline">MAX_SIZE</code>。避免使用 <code class="inline">l</code>、<code class="inline">O</code>、<code class="inline">I</code> 等易与数字混淆的单字母。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：变量声明</div>
+          <p>Python 不需要 <code class="inline">let</code>/<code class="inline">const</code>/<code class="inline">var</code> 声明关键字，直接赋值即可。JS 中用 <code class="inline">const</code> 定义不可变绑定（类似 Python 的"约定不可变"），<code class="inline">let</code> 定义可变绑定。Python 中所有变量本质都是对象的引用。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// JS 写法 — 需要声明关键字
+let name = "Alice";       // 可变 (类似 Python)
+const PI = 3.14159;       // 不可变绑定 (Python 无此概念)
+let a = 1, b = 2, c = 3;  // JS 也支持多重赋值
+[a, b] = [b, a];          // JS 解构赋值实现交换
+console.log(typeof name);  // "string" — 用 typeof 查类型
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="datatypes" id="datatypes">基本数据类型</h2>
+        <p>Python 有五种最基本的数据类型，它们是构建所有程序的基础：</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 1. 整数 (int) — 无限精度，不会溢出
+big_number = 10 ** 100
+print(big_number)  # 100位的整数也没问题
+
+# 2. 浮点数 (float) — 64位双精度
+pi = 3.141592653589793
+science = 6.022e23  # 科学计数法
+
+# 3. 字符串 (str) — 不可变序列
+greeting = "Hello, World!"
+multiline = """这是
+多行字符串"""
+
+# 4. 布尔值 (bool) — True 或 False
+is_python_fun = True
+is_boring = False
+
+# 5. None — 表示空值/无值
+result = None
+print(result is None)  # True</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>Python 的 <code class="inline">int</code> 是<strong>任意精度</strong>的——无论多大的整数都不会溢出（代价是超大数运算比固定长度类型慢）。这与 C/Java 的定长 int 不同，也是 Python 适合科学计算的加分项。布尔值 <code class="inline">bool</code> 其实是 <code class="inline">int</code> 的子类：<code class="inline">True == 1</code>、<code class="inline">False == 0</code>。</p>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：用基础类型建模真实数据</div>
+          <p>一条气象记录可以用基本类型组合表达，理解"基础类型是复杂结构的积木"：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">city = "Shanghai"
+temperature = 26.5          # float
+humidity = 78               # int (百分比)
+is_raining = False          # bool
+note = None                 # 暂未填写
+
+print(f"{city}: {temperature}°C, 湿度 {humidity}%, "
+      f"{'下雨' if is_raining else '未下雨'}")</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="operators" id="operators">运算符</h2>
+        <p>Python 提供了丰富的运算符，其中一些是 Python 特有的。运算符本质上是"语法糖"——<code class="inline">a + b</code> 实际调用了 <code class="inline">a.__add__(b)</code>，这让你可以为自定义对象重载运算符（见面向对象章）。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 算术运算符
+print(10 / 3)    # 3.333... — 普通除法，结果为 float
+print(10 // 3)   # 3       — 整除，向下取整
+print(10 % 3)    # 1       — 取模（余数）
+print(2 ** 10)    # 1024    — 幂运算
+
+# 比较运算符
+print(3 == 3)     # True
+print(3 != 4)     # True
+print(1 &lt; 2 &lt; 3)  # True — 链式比较，Python特色
+
+# 逻辑运算符
+print(True and False)  # False
+print(True or False)   # True
+print(not True)         # False
+
+# 增强赋值运算符
+x = 10
+x += 5   # 等价于 x = x + 5
+x *= 2   # 等价于 x = x * 2
+x //= 3  # 等价于 x = x // 3</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>浮点数运算存在精度问题：<code class="inline">0.1 + 0.2</code> 的结果不是 <code class="inline">0.3</code> 而是 <code class="inline">0.30000000000000004</code>。这是二进制无法精确表示某些十进制小数导致的（IEEE 754 标准）。需要精确计算（如金额）时请使用 <code class="inline">decimal</code> 模块，需要判断是否相等时用 <code class="inline">abs(a-b) &lt; 1e-9</code> 这类容差比较。</p>
+        </div>
+
+        <h2 data-section="strings" id="strings">字符串操作</h2>
+        <p>字符串是 Python 中最常用的数据类型之一，掌握字符串操作至关重要。字符串是<strong>不可变</strong>的——任何"修改"都会返回一个新的字符串对象，原字符串不变。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">s = "Hello, Python!"
+
+# 字符串索引与切片
+print(s[0])        # 'H' — 索引从0开始
+print(s[-1])       # '!' — 负索引从末尾开始
+print(s[0:5])      # 'Hello' — 切片 [start:end]
+print(s[7:])        # 'Python!'
+print(s[::-1])      # '!nohtyP ,olleH' — 反转字符串
+
+# f-string 格式化 (推荐)
+name = "Alice"
+score = 95.5
+print(f"姓名: {name}, 成绩: {score:.1f}")
+
+# 常用字符串方法
+print("  hello  ".strip())       # 'hello' — 去除首尾空格
+print("hello world".upper())       # 'HELLO WORLD'
+print("Hello,World".split(","))    # ['Hello', 'World']
+print("-".join(["2026", "06", "23"]))  # '2026-06-23'
+print("Python".replace("Py", "Jy"))   # 'Jython'
+print("hello".count("l"))           # 2</code></pre>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：清洗用户输入的手机号</div>
+          <p>真实项目里用户输入常常带空格、横杠、国家码，需要清洗为标准格式：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">def normalize_phone(raw):
+    # 去空格、去横杠、去括号，只保留数字
+    cleaned = "".join(ch for ch in raw if ch.isdigit())
+    if cleaned.startswith("86"):
+        cleaned = cleaned[2:]      # 去掉国家码 86
+    return cleaned if len(cleaned) == 11 else None
+
+print(normalize_phone("+86 138-1234-5678"))  # 13812345678
+print(normalize_phone("021-5566"))            # None（位数不对）</code></pre>
+          </div>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：字符串操作</div>
+          <p>Python 的 f-string 对应 JS 的模板字符串（Template Literals）。Python 的 <code class="inline">.strip()</code> = JS 的 <code class="inline">.trim()</code>，<code class="inline">.split()</code> = JS 的 <code class="inline">.split()</code>，<code class="inline">.replace()</code> = JS 的 <code class="inline">.replaceAll()</code>（全局替换）。但 Python 字符串不可变，JS 中字符串也是不可变的。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// JS 写法 — 模板字符串 + 字符串方法
+const s = "Hello, World!";
+console.log(s[0]);              // "H" — 索引访问 (同 Python)
+console.log(s.slice(0, 5));       // "Hello" — 类似切片
+console.log(s.split(", "));       // ["Hello", "World!"]
+console.log(s.toUpperCase());    // "HELLO, WORLD!"
+console.log(s.trim());           // "Hello, World!"
+
+// 模板字符串 (类似 f-string)
+const name = "Alice", score = 95.5;
+console.log(`姓名: ${name}, 成绩: ${score.toFixed(1)}`);
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="conversion" id="conversion">类型转换</h2>
+        <p>在 Python 中，你可以使用内置函数在不同类型之间进行转换。理解类型转换，是避免 <code class="inline">TypeError</code> 的关键。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># int() — 转为整数
+print(int("42"))       # 42
+print(int(3.99))       # 3 (截断小数部分)
+print(int(True))       # 1
+
+# float() — 转为浮点数
+print(float("3.14"))    # 3.14
+print(float(5))         # 5.0
+
+# str() — 转为字符串
+print(str(42))          # '42'
+print(str(3.14))        # '3.14'
+
+# bool() — 转为布尔值
+print(bool(0))          # False — 0 为 False
+print(bool(""))         # False — 空字符串为 False
+print(bool("hello"))     # True — 非空字符串为 True</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>"假值"（falsy）约定很重要：<code class="inline">0</code>、<code class="inline">0.0</code>、<code class="inline">""</code>、<code class="inline">[]</code>、<code class="inline">{}</code>、<code class="inline">None</code>、<code class="inline">False</code> 在布尔上下文都视为 False。所以常写成 <code class="inline">if users:</code> 而非 <code class="inline">if len(users) &gt; 0:</code>，更地道。</p>
+        </div>
+
+        <h2 data-section="io" id="io">输入与输出</h2>
+        <p>程序需要与用户交互，<code class="inline">input()</code> 接收用户输入，<code class="inline">print()</code> 输出信息到屏幕。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># input() 始终返回字符串
+name = input("请输入你的名字: ")
+print(f"你好, {name}!")
+
+# 需要数字时，要手动转换
+age_str = input("请输入你的年龄: ")
+age = int(age_str)
+print(f"明年你将 {age + 1} 岁")
+
+# print() 的多种用法
+print("Hello", "World", "!")           # 默认用空格分隔
+print("Hello", "World", sep="-")       # 用 - 分隔
+print("不换行", end="")
+print("继续在同一行")
+
+# 格式化输出
+price = 19.99
+print(f"价格: ¥{price:.2f}")  # 价格: ¥19.99</code></pre>
+        </div>
+
+        <h2 data-section="encoding" id="encoding">字符编码与字符串</h2>
+        <p>计算机只认二进制，字符需要按某种编码规则映射成数字。ASCII 用 1 字节表示英文字符；Unicode 给全球每个字符分配唯一码点（code point）；UTF-8 是 Unicode 的一种可变长度编码，英文字符占 1 字节、中文通常占 3 字节，是 Web 与文件存储的事实标准。理解编码，才能正确处理"中文乱码""emoji"等真实问题。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 字符 ↔ 码点
+print(ord("A"))        # 65
+print(ord("中"))       # 20013
+print(chr(65))         # 'A'
+print(chr(20013))      # '中'
+
+# str 编码为 bytes (UTF-8)
+s = "你好, Python"
+b = s.encode("utf-8")
+print(b)               # b'\xe4\xbd\xa0\xe5\xa5\xbd, Python'
+print(len(b))          # 字节数 (中文各占 3 字节)
+
+# bytes 解码为 str
+text = b.decode("utf-8")
+print(text)            # 你好, Python
+
+# 字节字面量
+raw = b"abc"
+print(raw[0])          # 97 (字节值)
+print(raw == bytes([97, 98, 99]))  # True
+
+# 常见误区：编码不一致会报错
+try:
+    "中文".encode("ascii")
+except UnicodeEncodeError as e:
+    print("编码失败:", e)</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p><code class="inline">str</code> 是字符序列、<code class="inline">bytes</code> 是字节序列，两者不能混用。网络传输、文件读写二进制数据时常用 <code class="inline">bytes</code>，处理文本时务必先 <code class="inline">decode</code> 成 <code class="inline">str</code>。Python 3 的 <code class="inline">str</code> 默认就是 Unicode，这是它比 Python 2 更友好的重大改进。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：文本编码</div>
+          <p>JS 字符串内部使用 UTF-16，而 Python <code class="inline">str</code> 是 Unicode 码点序列；二者都需要编码才能变成字节。JS 提供 <code class="inline">TextEncoder</code>/<code class="inline">TextDecoder</code> 完成 UTF-8 编解码，Python 则直接在 <code class="inline">str</code> 与 <code class="inline">bytes</code> 之间用 <code class="inline">encode/decode</code> 转换。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// JS 写法 — UTF-16 字符串 &amp; TextEncoder
+console.log("A".charCodeAt(0));        // 65 — 类似 Python ord("A")
+console.log(String.fromCharCode(20013)); // "中" — 类似 Python chr(20013)
+const encoder = new TextEncoder();     // 默认 UTF-8
+const bytes = encoder.encode("你好");  // Uint8Array (UTF-8 字节)
+const decoder = new TextDecoder();
+console.log(decoder.decode(bytes));    // "你好"
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="style" id="style">注释与代码风格</h2>
+        <p>可读性与一致性是团队协作的基础。Python 用 <code class="inline">#</code> 写单行注释，用三引号 <code class="inline">"""文档字符串"""</code> 编写函数/类的说明文档。好的注释解释"为什么"，而非复述"做了什么"。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 这是单行注释，解释"为什么"而非"做了什么"
+
+def calculate_discount(price, rate):
+    """计算折后价格。
+
+    Args:
+        price: 原价 (float)
+        rate: 折扣率 0~1 (float)
+    Returns:
+        折后价格 (float)
+    """
+    return price * (1 - rate)
+
+# PEP 8 推荐：4 空格缩进、snake_case 命名
+user_name = "Alice"
+max_retry_count = 3
+
+print(calculate_discount.__doc__)  # 打印文档字符串</code></pre>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：用文档字符串自动生成 API 文档</div>
+          <p>良好的 docstring 不仅方便阅读，还能被 <code class="inline">help()</code>、IDE 提示和文档工具（如 Sphinx、pdoc）直接利用：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">def fetch_user(uid):
+    """根据用户 ID 获取用户信息。
+
+    先从缓存读取，未命中再查数据库。
+
+    Args:
+        uid (int): 用户唯一标识
+    Returns:
+        dict | None: 用户字典，不存在则返回 None
+    """
+    ...
+
+# 在交互环境或测试中：
+help(fetch_user)   # 直接看到上面的说明</code></pre>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>PEP 8 是 Python 官方代码风格指南，核心要点：缩进用 4 个空格（不要用 Tab）、变量/函数用 <code class="inline">snake_case</code>、类用 <code class="inline">CamelCase</code>、行宽不超过 79 字符。推荐工具：<code class="inline">black</code>（自动格式化）、<code class="inline">flake8</code>（风格检查）、<code class="inline">pylint</code>（深度静态分析）。</p>
+        </div>
+
+        <div class="keypoints">
+          <div class="keypoints-label">本章核心要点</div>
+          <ul>
+            <li>变量是"标签/引用"，赋值即重新绑定，不是"装数据的盒子"。</li>
+            <li>五种基本类型：<code class="inline">int</code>（无限精度）、<code class="inline">float</code>、<code class="inline">str</code>（不可变）、<code class="inline">bool</code>、<code class="inline">None</code>。</li>
+            <li>运算符含 Python 特色：<code class="inline">//</code> 整除、<code class="inline">**</code> 幂、链式比较 <code class="inline">1 &lt; x &lt; 10</code>。浮点有精度坑，金额用 <code class="inline">decimal</code>。</li>
+            <li>字符串不可变，善用切片、f-string、<code class="inline">str</code> 方法；<code class="inline">input()</code> 永远是字符串，需手动转换。</li>
+            <li>编码：<code class="inline">str</code>（字符）与 <code class="inline">bytes</code>（字节）用 <code class="inline">encode/decode</code> 互相转换，UTF-8 是标准。</li>
+            <li>遵循 PEP 8 与 docstring 规范，代码可读、可维护、可自动文档化。</li>
+          </ul>
+        </div>
+
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>个人名片生成器</strong> — 提示用户输入姓名、年龄、城市，用 f-string 生成一张格式化的个人名片并输出。</li>
+            <li><strong>温度转换器</strong> — 输入摄氏温度，转换为华氏温度 (F = C * 9/5 + 32) 并输出结果，保留一位小数。</li>
+            <li><strong>简易计算器</strong> — 输入两个数字和一个运算符 (+, -, *, /)，输出计算结果。注意处理除以零的情况。</li>
+            <li><strong>字符串统计</strong> — 输入一段英文文本，统计其中单词数量、字符数量（不含空格），并将文本反转输出。</li>
+            <li><strong>手机号清洗</strong> — 实现上面的 <code class="inline">normalize_phone</code>，测试多种输入格式，确保只保留 11 位有效数字。</li>
+          </ol>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="env.html">
+            <span class="nav-label">← 上一章</span>
+            <span class="nav-title">第一章：环境搭建</span>
+          </a>
+          <a href="datatypes.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第三章：数据类型</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand"><h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3><p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p></div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p><p>Built with HTML, CSS &amp; JavaScript</p></div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

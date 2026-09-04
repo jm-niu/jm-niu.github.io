@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>教程目录 — Python 学习教程</title>
+  <meta name="description" content="Python学习教程完整目录，按章节列出所有学习主题，包括基础语法、数据类型、控制流、函数、面向对象、文件操作、异常处理等。">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <span>Python</span>
+      </a>
+      <button class="nav-toggle" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="tutorials.html" class="active">教程目录</a></li>
+        <li><a href="resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1>教程目录</h1>
+      <p>按照由浅入深的顺序排列的 24 个章节，分为入门基础、核心进阶、面向对象与工程、标准库与生态、实战进阶五个阶段，每章包含知识点讲解、代码示例和练习建议。</p>
+    </div>
+
+    <!-- Chapter List -->
+    <section class="section">
+
+      <!-- Group 1 -->
+      <div class="course-group">
+        <h2 class="course-group-title">入门基础 <span class="group-count">第 1–4 章</span></h2>
+        <div class="chapter-grid">
+
+          <div class="chapter-card">
+            <span class="chapter-num">01</span>
+            <span class="difficulty beginner">入门</span>
+            <h3>环境搭建与第一个程序</h3>
+            <p>安装 Python、认识解释器，写出并运行你的第一个程序。</p>
+            <ul class="chapter-topics">
+              <li>Python 安装与版本验证</li>
+              <li>解释器交互模式 (REPL)</li>
+              <li>编写并运行第一个程序</li>
+              <li>编辑器与运行环境配置</li>
+              <li>基础输入 input 与输出 print</li>
+            </ul>
+            <a href="chapters/env.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">02</span>
+            <span class="difficulty beginner">入门</span>
+            <h3>基础语法</h3>
+            <p>Python 编程的起点，变量、运算符、字符串与编码基础。</p>
+            <ul class="chapter-topics">
+              <li>变量赋值与 PEP 8 命名</li>
+              <li>基本数据类型与运算符</li>
+              <li>字符串操作与 f-string</li>
+              <li>字符编码与 bytes 编解码</li>
+              <li>注释与代码风格</li>
+            </ul>
+            <a href="chapters/basics.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">03</span>
+            <span class="difficulty beginner">入门</span>
+            <h3>数据类型</h3>
+            <p>深入掌握 Python 核心数据结构的使用方法与适用场景。</p>
+            <ul class="chapter-topics">
+              <li>列表 list 与切片</li>
+              <li>字典 dict 与集合 set</li>
+              <li>元组 tuple 与不可变</li>
+              <li>bytes 与 bytearray</li>
+              <li>嵌套数据结构</li>
+            </ul>
+            <a href="chapters/datatypes.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">04</span>
+            <span class="difficulty beginner">入门</span>
+            <h3>控制流</h3>
+            <p>掌握程序的执行逻辑，用条件判断和循环控制代码流程。</p>
+            <ul class="chapter-topics">
+              <li>if / elif / else 条件</li>
+              <li>for 与 while 循环</li>
+              <li>推导式与 enumerate/zip</li>
+              <li>assert 断言</li>
+              <li>match-case 模式匹配</li>
+            </ul>
+            <a href="chapters/controlflow.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Group 2 -->
+      <div class="course-group">
+        <h2 class="course-group-title">核心进阶 <span class="group-count">第 5–8 章</span></h2>
+        <div class="chapter-grid">
+
+          <div class="chapter-card">
+            <span class="chapter-num">05</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>函数</h3>
+            <p>学会封装可复用的代码块，理解参数传递与作用域规则。</p>
+            <ul class="chapter-topics">
+              <li>参数：位置/默认/*args/**kwargs</li>
+              <li>返回值与 LEGB 作用域</li>
+              <li>递归函数</li>
+              <li>闭包与装饰器</li>
+              <li>参数解包 * 与 **</li>
+            </ul>
+            <a href="chapters/functions.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">06</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>高级特性</h3>
+            <p>切片、迭代、生成器——写出更 Pythonic 的优雅代码。</p>
+            <ul class="chapter-topics">
+              <li>切片 slice 高级用法</li>
+              <li>迭代 Iteration</li>
+              <li>列表/字典/集合推导式</li>
+              <li>生成器 generator 与 yield</li>
+              <li>迭代器 Iterator</li>
+            </ul>
+            <a href="chapters/advanced.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">07</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>函数式编程</h3>
+            <p>用高阶函数、lambda 与装饰器组织可组合的逻辑。</p>
+            <ul class="chapter-topics">
+              <li>高阶函数 map/filter/reduce</li>
+              <li>返回函数与闭包</li>
+              <li>lambda 表达式</li>
+              <li>装饰器进阶</li>
+              <li>偏函数 functools.partial</li>
+            </ul>
+            <a href="chapters/functional.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">08</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>模块与包管理</h3>
+            <p>组织代码为模块与包，掌握依赖与虚拟环境管理。</p>
+            <ul class="chapter-topics">
+              <li>模块基础与 __name__</li>
+              <li>导入方式与别名</li>
+              <li>包与 __init__ / __all__</li>
+              <li>pip 与依赖管理</li>
+              <li>虚拟环境 venv</li>
+            </ul>
+            <a href="chapters/modules.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Group 3 -->
+      <div class="course-group">
+        <h2 class="course-group-title">面向对象与工程 <span class="group-count">第 9–12 章</span></h2>
+        <div class="chapter-grid">
+
+          <div class="chapter-card">
+            <span class="chapter-num">09</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>面向对象编程</h3>
+            <p>用类和对象组织代码，掌握封装、继承与多态。</p>
+            <ul class="chapter-topics">
+              <li>类与实例、self</li>
+              <li>继承与方法覆写</li>
+              <li>封装与私有属性</li>
+              <li>魔术方法</li>
+              <li>__slots__ 与枚举 Enum</li>
+            </ul>
+            <a href="chapters/oop.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">10</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>面向对象高级编程</h3>
+            <p>@property、MixIn、定制类与元类，写出更地道的 OOP 代码。</p>
+            <ul class="chapter-topics">
+              <li>@property 属性</li>
+              <li>多重继承与 MixIn</li>
+              <li>定制类 dunder 方法</li>
+              <li>枚举类进阶</li>
+              <li>元类简介</li>
+            </ul>
+            <a href="chapters/oop-advanced.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">11</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>异常处理</h3>
+            <p>构建健壮的错误处理机制，编写可靠的生产级代码。</p>
+            <ul class="chapter-topics">
+              <li>try/except/else/finally</li>
+              <li>捕获多种异常</li>
+              <li>自定义异常类</li>
+              <li>调试技巧 pdb</li>
+              <li>assert 与异常处理</li>
+            </ul>
+            <a href="chapters/exceptions.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">12</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>调试与测试</h3>
+            <p>用断言、调试器和测试框架保障代码质量。</p>
+            <ul class="chapter-topics">
+              <li>assert 断言</li>
+              <li>调试方法 pdb / logging</li>
+              <li>单元测试 unittest / pytest</li>
+              <li>文档测试 doctest</li>
+              <li>测试最佳实践</li>
+            </ul>
+            <a href="chapters/testing.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Group 4 -->
+      <div class="course-group">
+        <h2 class="course-group-title">标准库与生态 <span class="group-count">第 13–18 章</span></h2>
+        <div class="chapter-grid">
+
+          <div class="chapter-card">
+            <span class="chapter-num">13</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>文件与 IO 编程</h3>
+            <p>学习文件读写、内存流、序列化与路径操作。</p>
+            <ul class="chapter-topics">
+              <li>文件读写与 with</li>
+              <li>StringIO 与 BytesIO</li>
+              <li>序列化 pickle</li>
+              <li>pathlib 与 os 路径</li>
+              <li>JSON 数据操作</li>
+            </ul>
+            <a href="chapters/files.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">14</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>正则表达式</h3>
+            <p>用 re 模块进行强大的文本匹配、提取与替换。</p>
+            <ul class="chapter-topics">
+              <li>re 基础 match / search</li>
+              <li>匹配规则与元字符</li>
+              <li>分组与替换</li>
+              <li>贪婪 vs 非贪婪</li>
+              <li>实战示例</li>
+            </ul>
+            <a href="chapters/regex.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">15</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>常用内置模块</h3>
+            <p>掌握 datetime、collections、itertools 等高频标准库。</p>
+            <ul class="chapter-topics">
+              <li>datetime 时间日期</li>
+              <li>collections 容器</li>
+              <li>itertools 迭代工具</li>
+              <li>base64 / hashlib 摘要</li>
+              <li>contextlib / urllib</li>
+            </ul>
+            <a href="chapters/stdlib.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">16</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>进程与线程</h3>
+            <p>理解并发模型，合理选择多进程、多线程与协程。</p>
+            <ul class="chapter-topics">
+              <li>多进程 multiprocessing</li>
+              <li>多线程与 GIL</li>
+              <li>ThreadLocal</li>
+              <li>进程 vs 线程选型</li>
+              <li>锁与同步</li>
+            </ul>
+            <a href="chapters/concurrency.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">17</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>第三方库与虚拟环境</h3>
+            <p>用 requests、Pillow、psutil 等生态库扩展能力。</p>
+            <ul class="chapter-topics">
+              <li>虚拟环境详解</li>
+              <li>requests HTTP 请求</li>
+              <li>Pillow 图像处理</li>
+              <li>chardet 编码检测</li>
+              <li>psutil 系统监控</li>
+            </ul>
+            <a href="chapters/thirdparty.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">18</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>异步 IO</h3>
+            <p>用 async/await 写出高性能的并发程序。</p>
+            <ul class="chapter-topics">
+              <li>async/await 协程</li>
+              <li>事件循环</li>
+              <li>协程与任务 gather</li>
+              <li>aiohttp 异步请求</li>
+              <li>异步编程实践</li>
+            </ul>
+            <a href="chapters/asyncio.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Group 5: 实战进阶 -->
+      <div class="course-group">
+        <h2 class="course-group-title">实战进阶 <span class="group-count">第 19–24 章</span></h2>
+        <div class="chapter-grid">
+
+          <div class="chapter-card">
+            <span class="chapter-num">19</span>
+            <span class="difficulty advanced">进阶</span>
+            <h3>Web 开发实战（Flask 入门）</h3>
+            <p>从零用 Flask 搭建可访问的 Web 应用，理解请求—响应循环。</p>
+            <ul class="chapter-topics">
+              <li>Flask 项目初始化与路由</li>
+              <li>Jinja2 模板渲染</li>
+              <li>请求与响应处理</li>
+              <li>表单与 PRG 模式</li>
+              <li>待办清单实战案例</li>
+            </ul>
+            <a href="chapters/web-flask.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">20</span>
+            <span class="difficulty advanced">进阶</span>
+            <h3>数据库与 ORM</h3>
+            <p>用 SQLAlchemy 把数据持久化，掌握模型设计与 CRUD。</p>
+            <ul class="chapter-topics">
+              <li>SQLite 与 SQL 注入防护</li>
+              <li>SQLAlchemy 模型定义</li>
+              <li>增删改查 CRUD</li>
+              <li>一对多关系与查询</li>
+              <li>Flask-Migrate 数据库迁移</li>
+            </ul>
+            <a href="chapters/database.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">21</span>
+            <span class="difficulty advanced">进阶</span>
+            <h3>用户认证与 Web 安全</h3>
+            <p>登录态、密码哈希与常见 Web 攻击防护。</p>
+            <ul class="chapter-topics">
+              <li>密码加盐哈希存储</li>
+              <li>Session 与 JWT 认证</li>
+              <li>XSS 跨站脚本防护</li>
+              <li>CSRF 跨站请求伪造防护</li>
+              <li>安全最佳实践</li>
+            </ul>
+            <a href="chapters/auth-security.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">22</span>
+            <span class="difficulty advanced">进阶</span>
+            <h3>RESTful API 设计</h3>
+            <p>设计规范可维护的 API，实现前后端分离协作。</p>
+            <ul class="chapter-topics">
+              <li>REST 资源与状态码</li>
+              <li>蓝图模块化组织</li>
+              <li>序列化与输入校验</li>
+              <li>统一错误处理</li>
+              <li>OpenAPI 文档与 CORS</li>
+            </ul>
+            <a href="chapters/api-design.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">23</span>
+            <span class="difficulty advanced">进阶</span>
+            <h3>部署上线与 CI/CD</h3>
+            <p>把应用部署到服务器，实现推送即上线。</p>
+            <ul class="chapter-topics">
+              <li>Gunicorn 生产服务器</li>
+              <li>环境变量配置管理</li>
+              <li>Docker 容器化</li>
+              <li>Nginx 反向代理与 HTTPS</li>
+              <li>GitHub Actions 自动部署</li>
+            </ul>
+            <a href="chapters/deploy.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+          <div class="chapter-card">
+            <span class="chapter-num">24</span>
+            <span class="difficulty advanced">进阶</span>
+            <h3>性能优化与测试工程</h3>
+            <p>测试保质量、压测定基线、优化看数据。</p>
+            <ul class="chapter-topics">
+              <li>pytest 单元测试</li>
+              <li>fixture 与 mock</li>
+              <li>cProfile 性能分析</li>
+              <li>缓存与异步任务</li>
+              <li>locust 压力测试</li>
+            </ul>
+            <a href="chapters/perf-testing.html" class="chapter-link">阅读本章 →</a>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Learning Path Guide -->
+    <section class="section-alt">
+      <div class="section">
+        <div class="section-header">
+          <h2>学习建议</h2>
+          <p>如何高效地使用本教程，最大化学习效果。</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="icon">1</div>
+            <h3>按顺序学习</h3>
+            <p>章节之间有递进关系，建议按顺序学习。每个章节都建立在前面的知识之上。</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon accent">2</div>
+            <h3>动手实践</h3>
+            <p>每读完一个知识点，立即在本地运行代码示例。修改参数看效果变化，加深理解。</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon">3</div>
+            <h3>完成练习</h3>
+            <p>每章末尾都有练习建议，务必独立完成。遇到困难先自己思考，再参考示例。</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon accent">4</div>
+            <h3>项目巩固</h3>
+            <p>学完所有章节后，选择一个完整项目（CLI 工具、Web 服务或数据分析）进行实战。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3>
+        <p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p>
+      </div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="chapters/env.html">环境搭建</a></li>
+          <li><a href="chapters/basics.html">基础语法</a></li>
+          <li><a href="chapters/datatypes.html">数据类型</a></li>
+          <li><a href="chapters/controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="chapters/functions.html">函数</a></li>
+          <li><a href="chapters/advanced.html">高级特性</a></li>
+          <li><a href="chapters/functional.html">函数式编程</a></li>
+          <li><a href="chapters/modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="chapters/oop.html">面向对象</a></li>
+          <li><a href="chapters/oop-advanced.html">OOP 高级</a></li>
+          <li><a href="chapters/exceptions.html">异常处理</a></li>
+          <li><a href="chapters/testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="chapters/files.html">文件与IO</a></li>
+          <li><a href="chapters/regex.html">正则表达式</a></li>
+          <li><a href="chapters/stdlib.html">常用内置模块</a></li>
+          <li><a href="chapters/concurrency.html">进程与线程</a></li>
+          <li><a href="chapters/thirdparty.html">第三方库</a></li>
+          <li><a href="chapters/asyncio.html">异步 IO</a></li>
+          <li><a href="resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="chapters/web-flask.html">Web 开发实战</a></li>
+          <li><a href="chapters/database.html">数据库与 ORM</a></li>
+          <li><a href="chapters/auth-security.html">认证与安全</a></li>
+          <li><a href="chapters/api-design.html">API 设计</a></li>
+          <li><a href="chapters/deploy.html">部署与 CI/CD</a></li>
+          <li><a href="chapters/perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p>
+      <p>Built with HTML, CSS &amp; JavaScript · 内容参考廖雪峰 Python 教程体系</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+
+  <script src="js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

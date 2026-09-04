@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二十一章：用户认证与 Web 安全 — Python 学习教程</title>
+  <meta name="description" content="Python Web 认证与安全教程：注册登录、密码哈希、Session 与 JWT、CSRF/XSS 防护、安全最佳实践，含项目案例与示意图。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo"><span>Python</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#password" class="active">密码哈希</a></li>
+          <li><a href="#session">Session 与登录态</a></li>
+          <li><a href="#jwt">JWT 认证</a></li>
+          <li><a href="#xss">XSS 防护</a></li>
+          <li><a href="#csrf">CSRF 防护</a></li>
+          <li><a href="#best">安全最佳实践</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a><span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a><span class="separator">/</span>
+          <span>认证与安全</span>
+        </div>
+
+        <h1>第二十一章：用户认证与 Web 安全</h1>
+        <div class="chapter-meta">
+          <span>难度：进阶</span>
+          <span>预计学习时间：1 周</span>
+          <span>前置知识：Web 开发、数据库与 ORM</span>
+        </div>
+
+        <p>有了 Web 框架和数据库，下一步必须解决"<strong>谁在用、能不能用</strong>"——这就是<strong>认证</strong>（Authentication，确认身份）与<strong>授权</strong>（Authorization，确认权限）。同时，Web 是公开暴露的服务，安全漏洞（XSS、CSRF、注入）随时可能被利用。本章把上一章的待办应用加上"用户登录"，并系统讲解常见 Web 攻击与防护。</p>
+
+        <div class="path-hint">
+          <span class="path-chip">密码哈希（不可逆）</span>
+          <span class="path-chip">Session/JWT 登录态</span>
+          <span class="path-chip">XSS / CSRF 防护</span>
+          <span class="path-chip">安全最佳实践</span>
+        </div>
+
+        <h2 data-section="password" id="password">密码哈希</h2>
+        <p><strong>绝对不要明文存密码</strong>。一旦数据库泄露，所有用户密码暴露，且用户常在多站复用密码，后果灾难性。正确做法是用<strong>加盐哈希</strong>：把密码经单向函数变成不可逆的固定长度串，并加入随机"盐"防止彩虹表攻击。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">from werkzeug.security import generate_password_hash, check_password_hash
+
+# 注册时：存哈希，不存明文
+raw_pwd = "my-secret-123"
+hashed = generate_password_hash(raw_pwd)   # 自动加盐，如 pbkdf2:sha256:...
+print(hashed)        # 每次结果不同（盐随机）
+
+# 登录时：用 check_password_hash 验证
+print(check_password_hash(hashed, "my-secret-123"))  # True
+print(check_password_hash(hashed, "wrong"))            # False</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>不要用 MD5/SHA1 存密码——它们太快，易被暴力破解。推荐 <code class="inline">bcrypt</code>、<code class="inline">argon2</code> 或 Werkzeug 内置的 <code class="inline">pbkdf2</code>，它们故意"慢"，并自带盐。也不要自己发明哈希算法。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：前端密码处理</div>
+          <p>前端可以在提交前做一次哈希，但<strong>不能替代服务端哈希</strong>——前端代码可被篡改、绕过。Node 生态用 <code class="inline">bcrypt</code>/<code class="inline">argon2</code> 同样在服务端哈希。前端只负责 HTTPS 传输与基础校验。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// Node 端用 bcryptjs（与 Python 思路一致）
+const bcrypt = require("bcryptjs");
+const hash = await bcrypt.hash("my-secret-123", 10);  // 10 = cost
+await bcrypt.compare("my-secret-123", hash);          // true
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="session" id="session">Session 与登录态</h2>
+        <p>HTTP 是<strong>无状态</strong>协议——服务器记不住"上一个请求是谁发的"。登录态靠 <strong>Session</strong> 实现：用户登录后，服务器生成一个会话 ID 存在内存/数据库，并通过 Cookie 发给浏览器；后续请求浏览器带上 Cookie，服务器据此识别用户。</p>
+
+        <div class="figure">
+          <svg viewBox="0 0 580 170" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <defs>
+              <marker id="arSes" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#3776AB"/></marker>
+            </defs>
+            <rect x="20" y="55" width="90" height="50" rx="6" fill="#eef6ff" stroke="#3776AB" stroke-width="2"/>
+            <text x="65" y="85" text-anchor="middle" font-size="12" fill="#2c3e50">浏览器</text>
+            <line x1="110" y1="75" x2="220" y2="75" stroke="#3776AB" stroke-width="2" marker-end="url(#arSes)"/>
+            <text x="165" y="68" text-anchor="middle" font-size="10" fill="#3776AB">登录请求</text>
+            <rect x="220" y="50" width="160" height="60" rx="6" fill="#fff" stroke="#3776AB" stroke-width="2"/>
+            <text x="300" y="75" text-anchor="middle" font-size="12" fill="#2c3e50">服务器</text>
+            <text x="300" y="93" text-anchor="middle" font-size="11" fill="#6c7a89">生成 Session ID</text>
+            <line x1="220" y1="95" x2="110" y2="95" stroke="#27ae60" stroke-width="2" marker-end="url(#arSes)"/>
+            <text x="165" y="113" text-anchor="middle" font-size="10" fill="#27ae60">Set-Cookie: sid=xxx</text>
+            <line x1="110" y1="130" x2="220" y2="130" stroke="#3776AB" stroke-width="2" marker-end="url(#arSes)"/>
+            <text x="165" y="146" text-anchor="middle" font-size="10" fill="#3776AB">后续请求带 Cookie</text>
+            <text x="300" y="160" text-anchor="middle" font-size="11" fill="#6c7a89">服务器凭 sid 识别用户</text>
+          </svg>
+          <p class="figure-caption">示意图：Session 登录流程 —— 首次登录服务器发 Cookie，之后浏览器自动带上，服务器据此维持登录态。</p>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">from flask import Flask, request, session, redirect, url_for, render_template
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+
+app = Flask(__name__)
+app.secret_key = "a-very-secret-random-string"   # 用于签名 Session，必须保密
+db = SQLAlchemy(app)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    pwd_hash = db.Column(db.String(200))
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        name = request.form["name"].strip()
+        if User.query.filter_by(name=name).first():
+            return "用户名已存在"
+        u = User(name=name, pwd_hash=generate_password_hash(request.form["password"]))
+        db.session.add(u); db.session.commit()
+        return redirect(url_for("login"))
+    return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        u = User.query.filter_by(name=request.form["name"]).first()
+        if u and check_password_hash(u.pwd_hash, request.form["password"]):
+            session["user_id"] = u.id        # 登录态写入 session
+            return redirect(url_for("profile"))
+        return "用户名或密码错误"
+    return render_template("login.html")
+
+@app.route("/profile")
+def profile():
+    uid = session.get("user_id")
+    if not uid:
+        return redirect(url_for("login"))    # 未登录踢回登录页
+    return f"欢迎用户 #{uid}"
+
+@app.route("/logout")
+def logout():
+    session.pop("user_id", None)
+    return redirect(url_for("login"))</code></pre>
+        </div>
+
+        <h2 data-section="jwt" id="jwt">JWT 认证</h2>
+        <p>Session 把状态存在服务端，扩展到多台服务器时需共享 Session 存储。<strong>JWT</strong>（JSON Web Token）把登录态直接编码在 Token 里发给客户端，服务端无状态，适合前后端分离与微服务。Token 由 Header.Payload.Signature 三段组成，签名保证不可篡改。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-bash">pip install pyjwt</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">import jwt, datetime
+
+SECRET = "change-me-in-production"
+
+def make_token(user_id):
+    payload = {
+        "uid": user_id,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=2)   # 2小时过期
+    }
+    return jwt.encode(payload, SECRET, algorithm="HS256")
+
+def verify_token(token):
+    try:
+        return jwt.decode(token, SECRET, algorithms=["HS256"])   # 验签+查过期
+    except jwt.ExpiredSignatureError:
+        return None      # 过期
+    except jwt.InvalidTokenError:
+        return None      # 非法
+
+# 使用
+token = make_token(42)
+print(token)                    # eyJhbGci...
+print(verify_token(token))      # {'uid': 42, 'exp': ...}</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>JWT 签名只保证<strong>不被篡改</strong>，不保证<strong>不被窃取</strong>。Token 一旦泄露，在过期前可被冒用。务必走 HTTPS、设置较短过期时间、敏感操作二次验证。Token 不要存 localStorage（易被 XSS 偷），优先用 HttpOnly Cookie。</p>
+        </div>
+
+        <h2 data-section="xss" id="xss">XSS 防护</h2>
+        <p><strong>XSS</strong>（跨站脚本）指攻击者把恶意脚本注入到页面里，在其他用户浏览器执行，从而偷 Cookie 或劫持操作。根源是"未转义的用户输入被当作 HTML 渲染"。Jinja2 默认对 <code class="inline">{{ }}</code> 自动转义，是第一道防线。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 假设用户输入了： &lt;script&gt;alert(document.cookie)&lt;/script&gt;
+name = "&lt;script&gt;alert(document.cookie)&lt;/script&gt;"
+
+# Jinja2 默认转义，安全：
+# {{ name }} 渲染成 &amp;lt;script&amp;gt;...（显示为文本，不会执行）
+
+# 危险：用 |safe 或 Markup 关闭转义，等于主动放行 —— 慎用！
+# {{ name | safe }}   ← 这样会真的执行脚本！</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>凡是把用户输入渲染进 HTML，都依赖自动转义。需要输出富文本时，用<strong>白名单过滤库</strong>（如 <code class="inline">bleach</code>）只放行安全标签，而不是关闭转义。Cookie 加 <code class="inline">HttpOnly</code> 标志可让 JS 读不到，进一步降低 XSS 危害。</p>
+        </div>
+
+        <h2 data-section="csrf" id="csrf">CSRF 防护</h2>
+        <p><strong>CSRF</strong>（跨站请求伪造）指用户已登录 A 站时，被诱导访问恶意 B 站，B 站偷偷向 A 发请求（浏览器自动带上 A 的 Cookie），冒充用户执行操作。防护核心是给表单加一个攻击者无法预测的<strong>随机 Token</strong>。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 用 Flask-WTF 自动处理 CSRF Token
+pip install flask-wtf
+
+# app.py
+from flask_wtf import FlaskForm, CSRFProtect
+from wtforms import StringField, PasswordField
+from wtforms.validators import DataRequired
+
+app.config["SECRET_KEY"] = "your-secret"
+CSRFProtect(app)   # 全局开启 CSRF 保护
+
+class LoginForm(FlaskForm):
+    name = StringField("用户名", validators=[DataRequired()])
+    password = PasswordField("密码", validators=[DataRequired()])
+
+# 模板里加隐藏字段：
+# &lt;input type="hidden" name="csrf_token" value="{{ csrf_token() }}"&gt;</code></pre>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">项目案例：给待办网站加登录与防护</div>
+          <p>综合本章：注册用哈希、登录写 Session、表单加 CSRF、模板靠自动转义防 XSS，并要求登录后才能操作待办：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">from functools import wraps
+
+def login_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return wrapper
+
+@app.route("/add", methods=["POST"])
+@login_required                       # 未登录先去登录
+def add():
+    task = request.form.get("task", "").strip()
+    if task:
+        db.session.add(Todo(task=task, user_id=session["user_id"]))
+        db.session.commit()
+    return redirect(url_for("index"))</code></pre>
+          </div>
+          <p>这样每个用户只能看到自己的待办，且所有写操作都受 CSRF Token 与登录态双重保护。</p>
+        </div>
+
+        <h2 data-section="best" id="best">安全最佳实践</h2>
+        <ul class="steps">
+          <li class="step-item">
+            <h4>密码加盐哈希</h4>
+            <p>用 bcrypt/argon2/pbkdf2，绝不明文存密码，绝不自己造哈希。</p>
+          </li>
+          <li class="step-item">
+            <h4>防注入</h4>
+            <p>所有数据库操作走 ORM 或参数化查询，禁止字符串拼接 SQL。</p>
+          </li>
+          <li class="step-item">
+            <h4>防 XSS / CSRF</h4>
+            <p>依赖模板自动转义、给表单加 CSRF Token、Cookie 设 HttpOnly + SameSite。</p>
+          </li>
+          <li class="step-item">
+            <h4>最小权限与日志</h4>
+            <p>数据库账号只给必要权限；记录访问日志便于审计与溯源。</p>
+          </li>
+          <li class="step-item">
+            <h4>HTTPS 与密钥管理</h4>
+            <p>全站 HTTPS；密钥与口令放环境变量，不入代码库，定期轮换。</p>
+          </li>
+        </ul>
+
+        <div class="keypoints">
+          <div class="keypoints-label">本章核心要点</div>
+          <ul>
+            <li>认证确认"你是谁"，授权确认"你能做什么"，二者不同。</li>
+            <li>密码<strong>加盐哈希</strong>存储，用慢哈希算法，绝不明文。</li>
+            <li>Session 把状态存服务端；JWT 把状态存客户端，适合无状态/前后端分离。</li>
+            <li>XSS 靠模板<strong>自动转义</strong>防；CSRF 靠<strong>Token</strong>防。</li>
+            <li>SQL 注入靠<strong>ORM/参数化</strong>根除。</li>
+            <li>全站 HTTPS、密钥入环境变量、最小权限、记录日志。</li>
+          </ul>
+        </div>
+
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>注册登录</strong> — 给待办网站加注册/登录/登出，密码用哈希存储。</li>
+            <li><strong>登录保护</strong> — 用 <code class="inline">login_required</code> 装饰器保护待办操作，未登录跳登录页。</li>
+            <li><strong>JWT 版</strong> — 把 Session 改成 JWT，写一个受保护 API 接口，用 Token 访问。</li>
+            <li><strong>安全加固</strong> — 接入 Flask-WTF 的 CSRF，测试表单没有 Token 时是否被拒。</li>
+          </ol>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="database.html">
+            <span class="nav-label">← 上一章</span>
+            <span class="nav-title">第二十章：数据库与 ORM</span>
+          </a>
+          <a href="api-design.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第二十二章：API 设计</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand"><h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3><p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p></div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p><p>Built with HTML, CSS &amp; JavaScript</p></div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

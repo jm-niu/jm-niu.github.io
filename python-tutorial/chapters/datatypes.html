@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第三章：数据类型 — Python 学习教程</title>
+  <meta name="description" content="Python数据类型教程，深入学习列表、元组、字典、集合等核心数据结构，含分步骤讲解、真实场景案例与示意图。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <span>Python</span>
+      </a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#list" class="active">列表 (list)</a></li>
+          <li><a href="#tuple">元组 (tuple)</a></li>
+          <li><a href="#dict">字典 (dict)</a></li>
+          <li><a href="#set">集合 (set)</a></li>
+          <li><a href="#mutable">可变 vs 不可变</a></li>
+          <li><a href="#bytes">bytes 与 bytearray</a></li>
+          <li><a href="#nested">嵌套数据结构</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a>
+          <span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a>
+          <span class="separator">/</span>
+          <span>数据类型</span>
+        </div>
+
+        <h1>第三章：数据类型</h1>
+        <div class="chapter-meta">
+          <span>难度：入门</span>
+          <span>预计学习时间：1-2 周</span>
+          <span>前置知识：基础语法</span>
+        </div>
+
+        <p>Python 提供了多种强大的内置数据结构，它们是组织、存储和操作数据的"容器"。掌握列表、元组、字典、集合每一种结构的特性与适用场景，是写出高效、可维护 Python 代码的关键。本章不仅会讲解语法，还会通过<strong>分步骤拆解、真实项目案例和示意图</strong>，帮你建立对数据的直观理解。</p>
+
+        <div class="path-hint">
+          <span class="path-chip">先掌握基础语法（变量/运算符）</span>
+          <span class="path-chip">理解"对象引用"模型</span>
+          <span class="path-chip">逐一攻克 4 种容器</span>
+          <span class="path-chip">学会在真实项目中选择合适结构</span>
+        </div>
+
+        <h2 data-section="list" id="list">列表 (list)</h2>
+        <p>列表是 Python 中最常用的数据结构，它是一个<strong>有序、可变</strong>的元素集合，可以包含任意类型、甚至混合类型的元素。你可以把它理解为"一排带编号的抽屉"。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 创建列表
+fruits = ["apple", "banana", "cherry"]
+numbers = [1, 2, 3, 4, 5]
+mixed = [1, "hello", 3.14, True]
+
+# 访问元素
+print(fruits[0])     # 'apple'
+print(fruits[-1])    # 'cherry' — 负索引从末尾开始
+print(fruits[1:3])   # ['banana', 'cherry'] — 切片 [start:end]
+
+# 修改元素
+fruits[0] = "orange"
+
+# 添加元素
+fruits.append("grape")          # 末尾添加
+fruits.insert(0, "mango")        # 指定位置插入
+fruits.extend(["kiwi", "pear"])  # 批量添加
+
+# 删除元素
+fruits.remove("banana")          # 按值删除
+removed = fruits.pop()           # 删除并返回末尾元素
+del fruits[0]                    # 按索引删除
+
+# 常用方法
+print(len(fruits))               # 列表长度
+print("mango" in fruits)         # 是否包含
+fruits.sort()                    # 原地排序
+fruits.reverse()                 # 原地反转
+print(fruits.count("apple"))     # 元素出现次数</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>列表推导式（List Comprehension）是 Python 的标志性语法，用一行代码生成列表，既快又清晰：<code class="inline">[x**2 for x in range(10) if x % 2 == 0]</code> 会产出 <code class="inline">[0, 4, 16, 36, 64, 81]</code>。</p>
+        </div>
+
+        <h3>从零掌握列表：5 个步骤</h3>
+        <ul class="steps">
+          <li class="step-item">
+            <h4>创建与初始化</h4>
+            <p>用方括号 <code class="inline">[]</code> 创建，可先建空列表再逐步添加（适合数据来源是循环或外部输入时）。</p>
+          </li>
+          <li class="step-item">
+            <h4>访问与切片</h4>
+            <p>用 <code class="inline">[index]</code> 取单个元素，<code class="inline">[start:end:step]</code> 取一段；记住索引从 0 开始，负索引从末尾倒数。</p>
+          </li>
+          <li class="step-item">
+            <h4>增删改元素</h4>
+            <p>用 <code class="inline">append/insert/extend</code> 增，<code class="inline">remove/pop/del</code> 删，直接下标赋值改。注意 <code class="inline">pop</code> 会返回被删元素。</p>
+          </li>
+          <li class="step-item">
+            <h4>用列表推导式批量生成</h4>
+            <p>当需要对一个序列做"变换+筛选"时，优先用推导式代替手写 for 循环，代码更短、可读性更高。</p>
+          </li>
+          <li class="step-item">
+            <h4>避免"共享引用"陷阱</h4>
+            <p><code class="inline">b = a</code> 只是让 b 指向同一个列表；要用 <code class="inline">b = a.copy()</code> 或 <code class="inline">a[:]</code> 获得独立副本，否则改一个会牵连另一个。</p>
+          </li>
+        </ul>
+
+        <div class="figure">
+          <svg viewBox="0 0 580 170" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <defs>
+              <marker id="arrowList" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L8,3 L0,6 Z" fill="#3776AB"/>
+              </marker>
+            </defs>
+            <rect x="20" y="65" width="80" height="40" rx="6" fill="#eef6ff" stroke="#3776AB" stroke-width="2"/>
+            <text x="60" y="90" text-anchor="middle" font-size="14" fill="#2c3e50">fruits</text>
+            <line x1="100" y1="85" x2="185" y2="85" stroke="#3776AB" stroke-width="2" marker-end="url(#arrowList)"/>
+            <rect x="185" y="55" width="360" height="60" rx="6" fill="#fff" stroke="#3776AB" stroke-width="2"/>
+            <rect x="185" y="55" width="60" height="60" fill="#f7f9fc" stroke="#e0e6ed"/>
+            <text x="215" y="90" text-anchor="middle" font-size="12" fill="#2c3e50">"apple"</text>
+            <line x1="245" y1="85" x2="260" y2="85" stroke="#e0e6ed"/>
+            <rect x="260" y="55" width="60" height="60" fill="#f7f9fc" stroke="#e0e6ed"/>
+            <text x="290" y="90" text-anchor="middle" font-size="12" fill="#2c3e50">"banana"</text>
+            <rect x="320" y="55" width="60" height="60" fill="#f7f9fc" stroke="#e0e6ed"/>
+            <text x="350" y="90" text-anchor="middle" font-size="12" fill="#2c3e50">"cherry"</text>
+            <rect x="380" y="55" width="60" height="60" fill="#fff" stroke="#e0e6ed" stroke-dasharray="4"/>
+            <text x="410" y="90" text-anchor="middle" font-size="14" fill="#95a5a6">…</text>
+            <text x="185" y="135" font-size="12" fill="#6c7a89">变量只保存"引用"，真正数据存放在堆上的列表对象中，对象内部按顺序存放各元素引用。</text>
+          </svg>
+          <p class="figure-caption">示意图：列表在内存中的结构 —— 变量名 <code class="inline">fruits</code> 不直接保存数据，而是指向一个列表对象；列表对象连续存放指向各字符串的引用。</p>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：待办事项（Todo）管理器</div>
+          <p>列表是管理"有序、可变、同类型"数据的首选。比如一个简单的命令行待办清单：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">todos = []
+
+def add(task):
+    todos.append(task)
+    print(f"已添加：{task}")
+
+def complete():
+    if not todos:
+        print("没有待办事项")
+        return
+    done = todos.pop(0)          # 完成最早添加的任务
+    print(f"已完成：{done}")
+
+def show():
+    for i, t in enumerate(todos, 1):
+        print(f"{i}. {t}")
+
+add("写周报")
+add("发邮件")
+show()          # 1. 写周报  2. 发邮件
+complete()      # 已完成：写周报
+show()          # 1. 发邮件</code></pre>
+          </div>
+          <p><strong>为什么用列表？</strong> 待办事项有顺序、会动态增删、数量不固定 —— 这正是 <code class="inline">list</code> 的强项。若需要"按完成状态分组"或"按优先级排序"，列表的 <code class="inline">sort</code>/<code class="inline">sorted</code> 也能轻松胜任。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：list ↔ Array</div>
+          <p>Python 的 <code class="inline">list</code> 对应 JS 的 <code class="inline">Array</code>。核心方法一一对应：<code class="inline">.append()</code> → <code class="inline">.push()</code>、<code class="inline">.pop()</code> → <code class="inline">.pop()</code>、<code class="inline">.remove(val)</code> → 需用 <code class="inline">.splice(idx, 1)</code> 或 <code class="inline">.filter()</code>。Python 列表推导式对应 JS 的 <code class="inline">.map()</code>/<code class="inline">.filter()</code> 组合。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS 写法 — Array 操作
+const fruits = ["apple", "banana", "cherry"];
+fruits.push("grape");              // 末尾添加 (类似 .append())
+const removed = fruits.pop();      // 删除并返回末尾 (同 .pop())
+console.log(fruits.length);        // 数组长度 (同 len())
+
+// 推导式替代方案
+const evens = [0,1,2,3,4,5,6,7,8,9]
+  .filter(x => x % 2 === 0)
+  .map(x => x ** 2);
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="tuple" id="tuple">元组 (tuple)</h2>
+        <p>元组与列表几乎一样，但<strong>一旦创建就不可修改</strong>。它适合存储"逻辑上应该保持不变"的数据，比如坐标、数据库一行记录、函数返回的多个值。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 创建元组
+point = (3, 4)
+colors = ("red", "green", "blue")
+single = (42,)  # 单元素元组，逗号不能省（(42) 只是加括号的数字）
+
+# 元组解包
+x, y = point
+print(f"x={x}, y={y}")  # x=3, y=4
+
+# 元组不可变，但可以包含可变元素
+data = ([1, 2], [3, 4])
+data[0].append(3)  # 合法 — 修改的是列表，不是元组本身
+
+# 元组方法（只有两个）
+print(colors.count("red"))   # 1
+print(colors.index("green")) # 1</code></pre>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：函数返回多个值 / 作为字典键</div>
+          <p>元组最常见的两个实战用途：① 让函数"一次性返回多个结果"；② 当多个值组合需要作为字典的键时（列表不可哈希，元组可以）。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python"># 1) 函数返回多个值（本质是返回元组）
+def min_max(nums):
+    return min(nums), max(nums)     # 返回 (最小值, 最大值)
+
+lo, hi = min_max([5, 2, 9, 1])
+print(lo, hi)                       # 1 9
+
+# 2) 用 (经度, 纬度) 元组做字典键，统计访问次数
+visits = {}
+for coord in [(116.4, 39.9), (121.5, 31.2), (116.4, 39.9)]:
+    visits[coord] = visits.get(coord, 0) + 1
+print(visits)   # {(116.4, 39.9): 2, (121.5, 31.2): 1}</code></pre>
+          </div>
+        </div>
+
+        <div class="keypoints">
+          <div class="keypoints-label">何时用元组而非列表？</div>
+          <ul>
+            <li>数据在逻辑上是固定的常量集合（如 RGB 颜色、日期分量）。</li>
+            <li>需要把多个值当作一个整体当字典的键或集合元素。</li>
+            <li>函数要返回多个值，或要保护数据不被意外修改。</li>
+            <li>性能上元组比列表略轻量，大量只读数据时优先用元组。</li>
+          </ul>
+        </div>
+
+        <h2 data-section="dict" id="dict">字典 (dict)</h2>
+        <p>字典是<strong>键值对</strong>的集合，通过键（key）快速查找值（value）。Python 3.7+ 保证字典的<strong>插入顺序</strong>。它对应现实中的"通讯录"——用名字（键）查号码（值），查询速度几乎不受数据量影响。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 创建字典
+student = {
+    "name": "Alice",
+    "age": 20,
+    "grades": [90, 85, 92]
+}
+
+# 访问值
+print(student["name"])                  # 'Alice'
+print(student.get("email", "未设置"))   # '未设置' — 安全访问，键不存在时返回默认值
+
+# 添加/修改
+student["email"] = "alice@example.com"
+student["age"] = 21
+
+# 删除
+del student["email"]
+age = student.pop("age")     # 删除并返回值
+
+# 遍历字典
+for key, value in student.items():
+    print(f"{key}: {value}")
+
+# 常用操作
+print(len(student))        # 键值对数量
+print("name" in student)   # 是否包含键
+print(student.keys())      # 所有键
+print(student.values())    # 所有值
+
+# 字典推导式
+squares = {x: x**2 for x in range(6)}
+print(squares)  # {0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}</code></pre>
+        </div>
+
+        <h3>从零掌握字典：4 个步骤</h3>
+        <ul class="steps">
+          <li class="step-item">
+            <h4>设计键与值</h4>
+            <p>键必须"可哈希"（通常是字符串、数字、元组）；值可以是任意对象。用有意义的键名让数据自解释。</p>
+          </li>
+          <li class="step-item">
+            <h4>增 / 改 / 查</h4>
+            <p><code class="inline">d[key] = value</code> 既能新增也能修改；用 <code class="inline">.get(key, default)</code> 安全读取，避免键不存在时抛 <code class="inline">KeyError</code>。</p>
+          </li>
+          <li class="step-item">
+            <h4>删除与判断</h4>
+            <p><code class="inline">del d[key]</code> 或 <code class="inline">d.pop(key)</code> 删除；用 <code class="inline">key in d</code> 判断键是否存在。</p>
+          </li>
+          <li class="step-item">
+            <h4>遍历与批量构造</h4>
+            <p>用 <code class="inline">.items()</code> 同时取键值；用<strong>字典推导式</strong>从已有数据批量生成字典（如把两个列表"压缩"成字典）。</p>
+          </li>
+        </ul>
+
+        <div class="figure">
+          <svg viewBox="0 0 580 200" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <defs>
+              <marker id="arrowDict" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L8,3 L0,6 Z" fill="#3776AB"/>
+              </marker>
+            </defs>
+            <rect x="20" y="80" width="70" height="40" rx="6" fill="#eef6ff" stroke="#3776AB" stroke-width="2"/>
+            <text x="55" y="105" text-anchor="middle" font-size="14" fill="#2c3e50">student</text>
+            <line x1="90" y1="100" x2="170" y2="100" stroke="#3776AB" stroke-width="2" marker-end="url(#arrowDict)"/>
+            <rect x="170" y="20" width="380" height="160" rx="8" fill="#fff" stroke="#3776AB" stroke-width="2"/>
+            <text x="185" y="45" font-size="12" fill="#6c7a89">哈希表（内部数组 + 链表/树）</text>
+            <rect x="195" y="60" width="120" height="40" rx="4" fill="#f7f9fc" stroke="#e0e6ed"/>
+            <text x="255" y="85" text-anchor="middle" font-size="13" fill="#2c3e50">"name"</text>
+            <line x1="315" y1="80" x2="345" y2="80" stroke="#e0e6ed" marker-end="url(#arrowDict)"/>
+            <rect x="345" y="60" width="120" height="40" rx="4" fill="#eafaf0" stroke="#27ae60"/>
+            <text x="405" y="85" text-anchor="middle" font-size="13" fill="#2c3e50">"Alice"</text>
+            <rect x="195" y="115" width="120" height="40" rx="4" fill="#f7f9fc" stroke="#e0e6ed"/>
+            <text x="255" y="140" text-anchor="middle" font-size="13" fill="#2c3e50">"age"</text>
+            <line x1="315" y1="135" x2="345" y2="135" stroke="#e0e6ed" marker-end="url(#arrowDict)"/>
+            <rect x="345" y="115" width="120" height="40" rx="4" fill="#eafaf0" stroke="#27ae60"/>
+            <text x="405" y="140" text-anchor="middle" font-size="13" fill="#2c3e50">20</text>
+          </svg>
+          <p class="figure-caption">示意图：字典的哈希查找 —— 键经过哈希函数映射到内部数组的一个位置，因此无论字典多大，按 key 取值的平均时间都接近 O(1)。</p>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：解析 JSON 接口响应</div>
+          <p>现代 Web API 几乎都返回 JSON，而 JSON 对象天然对应 Python 字典。下面是处理一个"用户列表"接口响应的典型写法：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">import json
+
+# 模拟接口返回的 JSON 字符串
+raw = '''
+[
+  {"id": 1, "name": "Alice", "active": true},
+  {"id": 2, "name": "Bob",   "active": false}
+]
+'''
+
+users = json.loads(raw)               # JSON 文本 → Python 列表[字典]
+
+# 统计活跃用户
+active = [u["name"] for u in users if u.get("active")]
+print("活跃用户:", active)            # ['Alice']
+
+# 组装成 {id: name} 方便按 id 查询
+by_id = {u["id"]: u["name"] for u in users}
+print(by_id[2])                       # Bob</code></pre>
+          </div>
+          <p>这种 <code class="inline">list[dict]</code> 结构在爬虫、后端接口、配置读取中无处不在，务必熟练掌握。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：dict ↔ Object / Map</div>
+          <p>Python 的 <code class="inline">dict</code> 对应 JS 的 <code class="inline">Object</code>（键值对）或 <code class="inline">Map</code>（有序、任意键）。Python 集合 <code class="inline">set</code> = JS <code class="inline">Set</code>，API 几乎一致。JS 中用 <code class="inline">Object.keys()</code>/<code class="inline">.values()</code>/<code class="inline">.entries()</code> 对应 Python 的 <code class="inline">.keys()</code>/<code class="inline">.values()</code>/<code class="inline">.items()</code>。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS 写法 — Object (类似 dict)
+const student = { name: "Alice", age: 20, grades: [90, 85] };
+console.log(student.name);              // "Alice"
+console.log(student["name"]);           // "Alice"
+student.email = "alice@example.com";    // 添加属性
+delete student.email;                   // 删除属性
+
+// 遍历 Object
+Object.entries(student).forEach(([k, v]) => console.log(`${k}: ${v}`));
+
+// JS Set (完全对应 Python set)
+const fruits = new Set(["apple", "banana", "apple"]);
+fruits.add("cherry");
+console.log([...fruits].filter(x => x !== "banana")); // 差集
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="set" id="set">集合 (set)</h2>
+        <p>集合是<strong>无序、不重复</strong>元素的集合，底层基于哈希表。它最适合做<strong>去重</strong>和<strong>集合运算</strong>（交集、并集、差集），就像数学中的集合。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 创建集合
+fruits = {"apple", "banana", "cherry"}
+numbers = set([1, 2, 2, 3, 3, 3])  # {1, 2, 3} — 自动去重
+
+# 添加和删除
+fruits.add("orange")
+fruits.discard("banana")  # 不存在不会报错（remove 会报错）
+
+# 集合运算
+a = {1, 2, 3, 4}
+b = {3, 4, 5, 6}
+
+print(a &amp; b)    # {3, 4} — 交集
+print(a | b)    # {1,2,3,4,5,6} — 并集
+print(a - b)    # {1, 2} — 差集
+print(a ^ b)    # {1,2,5,6} — 对称差集
+
+# 实用场景：列表去重（但会丢失顺序）
+duplicates = [1, 2, 2, 3, 3, 3, 4]
+unique = list(set(duplicates))  # [1, 2, 3, 4]</code></pre>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：文章标签 / 权限去重系统</div>
+          <p>当你需要"去重"或"判断共同/差异"时，集合比列表快得多（查找是 O(1) 而非 O(n)）。例如找出两篇文章的共同标签：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">tags_a = {"python", "web", "ai", "data"}
+tags_b = {"python", "ai", "cloud"}
+
+common = tags_a &amp; tags_b          # 共同标签
+print("共同标签:", common)          # {'python', 'ai'}
+
+only_a = tags_a - tags_b           # 仅 A 有
+print("仅 A 独有:", only_a)         # {'web', 'data'}
+
+all_tags = tags_a | tags_b         # 合并去重
+print("全部标签:", all_tags)</code></pre>
+          </div>
+        </div>
+
+        <div class="figure">
+          <svg viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <circle cx="200" cy="100" r="70" fill="rgba(55,118,171,0.18)" stroke="#3776AB" stroke-width="2"/>
+            <circle cx="320" cy="100" r="70" fill="rgba(108,92,231,0.18)" stroke="#6c5ce7" stroke-width="2"/>
+            <text x="160" y="100" text-anchor="middle" font-size="13" fill="#2c3e50">A</text>
+            <text x="360" y="100" text-anchor="middle" font-size="13" fill="#2c3e50">B</text>
+            <text x="260" y="100" text-anchor="middle" font-size="12" fill="#2c3e50">A∩B</text>
+            <text x="80" y="190" font-size="12" fill="#3776AB">左月牙：A−B（仅A）</text>
+            <text x="350" y="190" font-size="12" fill="#6c5ce7">右月牙：B−A（仅B）</text>
+          </svg>
+          <p class="figure-caption">示意图：韦恩图（Venn Diagram）—— 两圆重叠部分为交集 <code class="inline">A &amp; B</code>，合并为并集 <code class="inline">A | B</code>，彼此独有的部分为差集。</p>
+        </div>
+
+        <h2 data-section="mutable" id="mutable">可变 vs 不可变</h2>
+        <p>理解"可变（mutable）"与"不可变（immutable）"是 Python 编程的核心概念，它直接决定了<strong>变量之间是否会互相影响</strong>。简单说：不可变对象一旦创建就不能改；可变对象可以在原地修改。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 不可变类型：int, float, str, tuple, bool
+x = 10
+y = x        # y 指向同一个 10
+x = 20       # x 指向新的 20，y 仍然是 10
+print(y)     # 10 — 不可变，x 的改变不影响 y
+
+# 可变类型：list, dict, set
+list_a = [1, 2, 3]
+list_b = list_a        # list_b 和 list_a 指向同一个列表
+list_a.append(4)
+print(list_b)          # [1, 2, 3, 4] — 可变，改变会影响所有引用
+
+# 想要独立副本，使用 copy
+list_c = list_a.copy()  # 浅拷贝
+list_a.append(5)
+print(list_c)          # [1, 2, 3, 4] — 不受影响</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>函数参数传递的是"对象的引用"。如果传入可变对象（如列表），函数内对其修改<strong>会影响外部变量</strong>。如果不想被修改，传入前用 <code class="inline">.copy()</code> 或 <code class="inline">copy.deepcopy()</code> 复制一份。</p>
+        </div>
+
+        <div class="figure">
+          <svg viewBox="0 0 560 160" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <defs>
+              <marker id="arrowMut" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L8,3 L0,6 Z" fill="#e74c3c"/>
+              </marker>
+            </defs>
+            <rect x="30" y="60" width="70" height="40" rx="6" fill="#eef6ff" stroke="#3776AB" stroke-width="2"/>
+            <text x="65" y="85" text-anchor="middle" font-size="13" fill="#2c3e50">list_a</text>
+            <rect x="150" y="60" width="70" height="40" rx="6" fill="#eef6ff" stroke="#3776AB" stroke-width="2"/>
+            <text x="185" y="85" text-anchor="middle" font-size="13" fill="#2c3e50">list_b</text>
+            <rect x="300" y="55" width="200" height="50" rx="6" fill="#fff" stroke="#e74c3c" stroke-width="2"/>
+            <text x="400" y="85" text-anchor="middle" font-size="13" fill="#2c3e50">[1, 2, 3, 4] 共享对象</text>
+            <line x1="100" y1="80" x2="300" y2="80" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrowMut)"/>
+            <line x1="220" y1="80" x2="300" y2="80" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrowMut)"/>
+            <text x="300" y="135" font-size="12" fill="#e74c3c">list_a 与 list_b 指向同一个对象 → 一方修改，另一方"看得见"</text>
+          </svg>
+          <p class="figure-caption">示意图：可变对象的"共享引用" —— 多个变量指向同一个列表时，任何一方原地修改都会反映到所有变量上。</p>
+        </div>
+
+        <div class="keypoints">
+          <div class="keypoints-label">要点小结：可变 vs 不可变</div>
+          <ul>
+            <li><strong>不可变</strong>：int、float、str、tuple、bool、bytes —— 重新赋值其实是让变量指向新对象。</li>
+            <li><strong>可变</strong>：list、dict、set、bytearray —— 可在原地修改，多个引用会互相影响。</li>
+            <li>作为函数默认参数时，<strong>绝不要用可变对象</strong>（如 <code class="inline">def f(x=[])</code>），否则会被多次调用共享，应使用 <code class="inline">None</code> 占位。</li>
+            <li>需要"安全传递"可变对象时，先 <code class="inline">.copy()</code>。</li>
+          </ul>
+        </div>
+
+        <h2 data-section="bytes" id="bytes">bytes 与 bytearray</h2>
+        <p><code class="inline">bytes</code> 是<strong>不可变</strong>的字节序列，元素是整数 0~255；<code class="inline">bytearray</code> 是它的可变版本。它们与 <code class="inline">str</code> 不同：<code class="inline">str</code> 存"字符"、<code class="inline">bytes</code> 存"原始字节"，常用于网络传输和二进制文件（图片、音频等）。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 字节字面量 — 不可变
+b = b"abc"
+print(b[0])            # 97 (整数)
+print(b[1:])           # b'bc'
+
+# 由整数序列构造
+nums = bytes([65, 66, 67])
+print(nums)            # b'ABC'
+
+# bytearray — 可变
+ba = bytearray(b"hi")
+ba[0] = 72             # 修改第一个字节
+ba.append(33)          # 追加字节 '!'
+print(ba)              # bytearray(b'Hi!')
+ba.decode("ascii")     # 'Hi!'
+
+# 与 str 的区别
+s = "你好"
+print(type(s))         # &lt;class 'str'&gt;
+print(type(s.encode())) # &lt;class 'bytes'&gt;</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p><code class="inline">bytes</code> 的元素是整数而非单字符，因此 <code class="inline">b"abc"[0]</code> 返回 <code class="inline">97</code> 而非 <code class="inline">b"a"</code>。不要用 <code class="inline">+</code> 直接拼接 <code class="inline">str</code> 与 <code class="inline">bytes</code>，会报 <code class="inline">TypeError</code>，需先统一类型（如 <code class="inline">"hi".encode() + b"!"</code>）。</p>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：读取二进制文件 / 网络传输</div>
+          <p>处理图片、压缩包或 socket 通信时，数据本质就是字节流。务必区分"文本模式"和"二进制模式"：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python"># 以二进制模式读取图片（不能用文本模式！）
+with open("logo.png", "rb") as f:
+    raw = f.read()              # 得到 bytes
+print(type(raw), len(raw))     # &lt;class 'bytes'&gt; 文件大小
+
+# 把字节数据原样写回另一文件
+with open("copy.png", "wb") as f:
+    f.write(raw)
+
+# 文本一定要 encode 成 bytes 才能通过socket/网络发送
+message = "Hello".encode("utf-8")
+print(message)                  # b'Hello'</code></pre>
+          </div>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：二进制数据</div>
+          <p>Python 的 <code class="inline">bytes</code>/<code class="inline">bytearray</code> 对应 JS 的 <code class="inline">Uint8Array</code>（底层是 <code class="inline">ArrayBuffer</code>）。<code class="inline">Uint8Array</code> 同样以整数存取每个字节；<code class="inline">DataView</code> 则可按不同数据类型解读同一段缓冲区，类似 Python 中用 <code class="inline">struct</code> 模块解析字节。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS 写法 — Uint8Array / ArrayBuffer
+const buf = new ArrayBuffer(3);
+const view = new Uint8Array(buf);
+view[0] = 65; view[1] = 66; view[2] = 67;
+console.log(view[0]);        // 65 (整数, 同 Python bytes[i])
+console.log(String.fromCharCode(...view)); // "ABC"
+
+// DataView — 按类型解读缓冲区
+const dv = new DataView(new ArrayBuffer(4));
+dv.setUint32(0, 0x12345678);
+console.log(dv.getUint32(0)); // 305419896
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="nested" id="nested">嵌套数据结构</h2>
+        <p>列表套列表可以表示矩阵，字典可以嵌套列表或字典，形成<strong>树状或表格式</strong>数据。这是处理 JSON、配置文件、表格数据时的日常形态。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 列表套列表 — 矩阵
+matrix = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+]
+print(matrix[1][2])    # 6 — 第2行第3列
+
+# 遍历矩阵
+for row in matrix:
+    for val in row:
+        print(val, end=" ")
+    print()
+
+# 字典套列表
+students = {
+    "class_a": ["Alice", "Bob"],
+    "class_b": ["Carol", "Dave"],
+}
+print(students["class_a"][0])  # 'Alice'
+
+# 字典套字典 (常见 JSON 结构)
+users = {
+    "u1": {"name": "Alice", "age": 20},
+    "u2": {"name": "Bob", "age": 25},
+}
+for uid, info in users.items():
+    print(f"{uid}: {info['name']} - {info['age']}岁")
+
+# 递归遍历任意嵌套结构
+def walk(node, depth=0):
+    if isinstance(node, dict):
+        for k, v in node.items():
+            print("  " * depth + str(k))
+            walk(v, depth + 1)
+    elif isinstance(node, list):
+        for item in node:
+            walk(item, depth)
+    else:
+        print("  " * depth + repr(node))
+
+walk(users)</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>深层嵌套结构建议用 <code class="inline">isinstance()</code> 判断当前节点类型再决定如何遍历，这正是递归遍历 JSON / 目录树的通用写法。</p>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：解析真实 JSON 配置</div>
+          <p>下面用嵌套字典+列表模拟一个"应用配置"，并演示如何安全取值：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">import json
+
+config = '''
+{
+  "app": {"name": "MyApp", "debug": true},
+  "database": {"host": "localhost", "ports": [5432, 5433]},
+  "features": ["auth", "pay", "search"]
+}
+'''
+cfg = json.loads(config)
+
+name = cfg["app"]["name"]                 # 多层取值
+print("应用名:", name)
+
+# 安全取值：避免中间键缺失导致 KeyError
+db_port = cfg.get("database", {}).get("ports", [])[0]
+print("主库端口:", db_port)
+
+# 遍历 features
+for feat in cfg["features"]:
+    print("启用功能:", feat)</code></pre>
+          </div>
+        </div>
+
+        <div class="keypoints">
+          <div class="keypoints-label">本章核心要点</div>
+          <ul>
+            <li><strong>list</strong>：有序可变，适合序列/队列，用推导式高效生成。</li>
+            <li><strong>tuple</strong>：有序不可变，适合常量组、函数多返回值、字典键。</li>
+            <li><strong>dict</strong>：键值对，O(1) 查找，处理 JSON/配置的首选。</li>
+            <li><strong>set</strong>：无序去重，适合集合运算与快速判重。</li>
+            <li>牢记<strong>可变 vs 不可变</strong>的引用语义，远离"共享可变状态"的 bug。</li>
+            <li>真实项目中常把以上结构<strong>嵌套组合</strong>，并配合 <code class="inline">json</code> 模块读写。</li>
+          </ul>
+        </div>
+
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>学生成绩管理</strong> — 用字典存储多个学生的信息（姓名、年龄、成绩列表），实现添加、查询、统计平均分功能。</li>
+            <li><strong>词频统计器</strong> — 输入一段英文文本，统计每个单词出现的频率（用 dict），按频率从高到低排序输出。</li>
+            <li><strong>购物车系统</strong> — 用列表和字典实现一个购物车，支持添加商品、删除商品、计算总价、显示清单。</li>
+            <li><strong>集合去重工具</strong> — 输入两个列表，用集合运算找出它们的交集、并集和各自独有的元素。</li>
+            <li><strong>嵌套 JSON 解析</strong> — 构造一段嵌套的 JSON（部门→员工→技能列表），用递归函数统计所有技能总数。</li>
+          </ol>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="basics.html">
+            <span class="nav-label">← 上一章</span>
+            <span class="nav-title">第二章：基础语法</span>
+          </a>
+          <a href="controlflow.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第四章：控制流</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3>
+        <p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p>
+      </div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p><p>Built with HTML, CSS &amp; JavaScript</p></div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

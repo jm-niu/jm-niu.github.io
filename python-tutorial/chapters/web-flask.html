@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十九章：Web 开发实战（Flask 入门）— Python 学习教程</title>
+  <meta name="description" content="Python Web 开发实战教程：用 Flask 从零搭建项目，涵盖项目初始化、路由设计、模板渲染、请求与响应、表单处理，含完整项目案例与示意图。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo"><span>Python</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#overview" class="active">Web 与 Flask 概览</a></li>
+          <li><a href="#init">项目初始化</a></li>
+          <li><a href="#route">路由设计</a></li>
+          <li><a href="#template">模板渲染 (Jinja2)</a></li>
+          <li><a href="#request">请求与响应</a></li>
+          <li><a href="#form">表单处理</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a><span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a><span class="separator">/</span>
+          <span>Web 开发实战</span>
+        </div>
+
+        <h1>第十九章：Web 开发实战（Flask 入门）</h1>
+        <div class="chapter-meta">
+          <span>难度：进阶</span>
+          <span>预计学习时间：1-2 周</span>
+          <span>前置知识：函数、模块、面向对象、异常处理</span>
+        </div>
+
+        <p>从本章起，我们离开"命令行脚本"的世界，进入<strong>Web 开发</strong>——用 Python 写出能在浏览器里访问的应用。本章以轻量级框架 <strong>Flask</strong> 为例，带你从零搭建一个真实项目：初始化工程、设计路由、渲染页面模板、处理用户请求与表单。学完本章你就能独立做出一个可访问的"待办清单"网站雏形。</p>
+
+        <div class="path-hint">
+          <span class="path-chip">理解 HTTP 请求/响应</span>
+          <span class="path-chip">用 Flask 初始化项目</span>
+          <span class="path-chip">设计路由 + 模板</span>
+          <span class="path-chip">处理表单与重定向</span>
+        </div>
+
+        <h2 data-section="overview" id="overview">Web 与 Flask 概览</h2>
+        <p>Web 应用的本质是<strong>"请求—响应"循环</strong>：浏览器发起 HTTP 请求，服务器接收后调用对应处理函数，生成响应（HTML 页面或 JSON）返回浏览器。框架帮你屏蔽了"监听端口、解析 HTTP、拼接响应"等繁琐细节，让你专注业务逻辑。</p>
+
+        <p>Python 主流 Web 框架各有定位：</p>
+        <ul>
+          <li><strong>Flask</strong>：轻量、灵活、"微框架"，只提供路由与请求响应，其余按需扩展，适合学习与中小项目。</li>
+          <li><strong>Django</strong>：大而全，自带 ORM、后台、认证、模板，适合快速搭建内容型网站。</li>
+          <li><strong>FastAPI</strong>：现代、高性能，基于类型注解自动生成文档，适合构建 API 服务。</li>
+        </ul>
+        <p>本教程选用 Flask，因为它结构简单、概念清晰，是理解 Web 原理的最佳起点。</p>
+
+        <div class="figure">
+          <svg viewBox="0 0 580 180" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <defs>
+              <marker id="arWeb" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#3776AB"/></marker>
+            </defs>
+            <rect x="20" y="60" width="110" height="50" rx="6" fill="#eef6ff" stroke="#3776AB" stroke-width="2"/>
+            <text x="75" y="80" text-anchor="middle" font-size="13" fill="#2c3e50">浏览器</text>
+            <text x="75" y="98" text-anchor="middle" font-size="11" fill="#6c7a89">发起请求</text>
+            <line x1="130" y1="78" x2="230" y2="78" stroke="#3776AB" stroke-width="2" marker-end="url(#arWeb)"/>
+            <text x="180" y="70" text-anchor="middle" font-size="10" fill="#3776AB">HTTP 请求</text>
+            <rect x="230" y="55" width="140" height="60" rx="6" fill="#fff" stroke="#3776AB" stroke-width="2"/>
+            <text x="300" y="80" text-anchor="middle" font-size="13" fill="#2c3e50">Flask 路由</text>
+            <text x="300" y="98" text-anchor="middle" font-size="11" fill="#6c7a89">匹配 → 视图函数</text>
+            <line x1="370" y1="78" x2="470" y2="78" stroke="#3776AB" stroke-width="2" marker-end="url(#arWeb)"/>
+            <rect x="470" y="55" width="90" height="60" rx="6" fill="#eafaf0" stroke="#27ae60" stroke-width="2"/>
+            <text x="515" y="80" text-anchor="middle" font-size="12" fill="#2c3e50">视图函数</text>
+            <text x="515" y="98" text-anchor="middle" font-size="11" fill="#6c7a89">业务逻辑</text>
+            <line x1="470" y1="100" x2="370" y2="100" stroke="#27ae60" stroke-width="2" marker-end="url(#arWeb)"/>
+            <text x="420" y="115" text-anchor="middle" font-size="10" fill="#27ae60">响应</text>
+            <line x1="230" y1="100" x2="130" y2="100" stroke="#27ae60" stroke-width="2" marker-end="url(#arWeb)"/>
+            <text x="180" y="120" text-anchor="middle" font-size="10" fill="#27ae60">HTTP 响应</text>
+            <text x="300" y="155" text-anchor="middle" font-size="12" fill="#6c7a89">请求 → 路由匹配 → 视图处理 → 响应 → 回到浏览器</text>
+          </svg>
+          <p class="figure-caption">示意图：Web 应用的请求—响应循环 —— Flask 的核心工作就是"把 URL 路由到对应视图函数"，再把函数返回值作为 HTTP 响应送回浏览器。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：前后端协作</div>
+          <p>如果你写过 Vue/React，那前端是"在浏览器里跑的 SPA"，通过 <code class="inline">fetch/axios</code> 向后端发请求。Flask 就是接收这些请求的<strong>后端</strong>。前端负责交互与渲染，后端负责数据与业务。本章我们先让 Flask 直接返回完整 HTML 页面（传统 SSR），后面 API 章节再讲前后端分离。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// 前端发起请求（对应 Flask 路由接收）
+fetch("/api/todos")
+  .then(r => r.json())
+  .then(data => console.log(data));
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="init" id="init">项目初始化</h2>
+        <p>遵循第 1 章学到的<strong>虚拟环境</strong>规范，先把工程骨架搭起来。一个清晰的目录结构是可维护项目的起点。</p>
+
+        <h3>从零搭建：4 个步骤</h3>
+        <ul class="steps">
+          <li class="step-item">
+            <h4>创建项目目录与虚拟环境</h4>
+            <p>建文件夹、进入、用 <code class="inline">venv</code> 创建隔离环境并激活，确保依赖不污染全局。</p>
+          </li>
+          <li class="step-item">
+            <h4>安装 Flask</h4>
+            <p><code class="inline">pip install flask</code>，并把依赖固化到 <code class="inline">requirements.txt</code> 以便复现。</p>
+          </li>
+          <li class="step-item">
+            <h4>规划目录结构</h4>
+            <p>分出 <code class="inline">app.py</code>（入口）、<code class="inline">templates/</code>（模板）、<code class="inline">static/</code>（静态资源），让职责清晰。</p>
+          </li>
+          <li class="step-item">
+            <h4>写最小可运行应用</h4>
+            <p>用 <code class="inline">@app.route("/")</code> 定义首页，<code class="inline">app.run()</code> 启动开发服务器，浏览器访问验证。</p>
+          </li>
+        </ul>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-bash"># 1. 建目录与虚拟环境
+mkdir todo_web &amp;&amp; cd todo_web
+python3 -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
+
+# 2. 安装 Flask 并固化依赖
+pip install flask
+pip freeze &gt; requirements.txt
+
+# 3. 目录结构
+# todo_web/
+# ├── app.py          # 应用入口
+# ├── templates/      # Jinja2 模板
+# │   └── index.html
+# └── static/         # css/js/图片
+#     └── style.css</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># app.py — 最小可运行应用
+from flask import Flask
+
+app = Flask(__name__)          # 创建应用实例
+
+@app.route("/")                 # 把根路径绑定到下面函数
+def index():
+    return "Hello, Flask! 🐍"
+
+if __name__ == "__main__":
+    app.run(debug=True)         # 开启调试，改代码自动重启</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-bash">python app.py
+# 控制台显示: Running on http://127.0.0.1:5000
+# 浏览器打开该地址即可看到 Hello, Flask!</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p><code class="inline">debug=True</code> 仅用于开发，它会暴露调试器、允许任意代码执行，<strong>绝对不能用于生产</strong>。生产部署用专门的 WSGI 服务器（如 Gunicorn），见部署章。</p>
+        </div>
+
+        <h2 data-section="route" id="route">路由设计</h2>
+        <p>路由就是"<strong>URL → 处理函数</strong>"的映射表"。Flask 用装饰器 <code class="inline">@app.route(路径)</code> 声明路由，简洁直观。路径里可用 <code class="inline">&lt;类型:变量&gt;</code> 捕获动态参数。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">from flask import Flask
+
+app = Flask(__name__)
+
+# 静态路由
+@app.route("/")
+def home():
+    return "首页"
+
+@app.route("/about")
+def about():
+    return "关于我们"
+
+# 动态路由 — 捕获路径参数
+@app.route("/user/&lt;username&gt;")
+def user_profile(username):
+    return f"用户：{username}"
+
+# 指定类型转换器
+@app.route("/post/&lt;int:post_id&gt;")
+def show_post(post_id):
+    return f"文章 #{post_id}"
+
+# 限定 HTTP 方法
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    return "登录页（GET 展示 / POST 提交）"</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>RESTful 风格中，同一个 URL 用不同 HTTP 方法表达不同动作：<code class="inline">GET /todos</code> 列表、<code class="inline">POST /todos</code> 新建、<code class="inline">DELETE /todos/1</code> 删除。这与"一个动作一个 URL"的传统风格不同，更符合资源语义（详见 API 设计章）。</p>
+        </div>
+
+        <h2 data-section="template" id="template">模板渲染 (Jinja2)</h2>
+        <p>直接在 Python 里拼 HTML 字符串既难写又难维护。Flask 内置 <strong>Jinja2</strong> 模板引擎，让你把 HTML 放在 <code class="inline">templates/</code> 目录，用 <code class="inline">{{ 变量 }}</code> 插值、<code class="inline">{% 控制 %}</code> 做逻辑，实现数据与视图分离。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route("/greet/&lt;name&gt;")
+def greet(name):
+    # render_template 会去 templates/ 目录找模板并渲染
+    return render_template("greet.html", name=name, count=3)</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-html">&lt;!-- templates/greet.html --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body&gt;
+  &lt;h1&gt;你好，{{ name }}！&lt;/h1&gt;
+  &lt;ul&gt;
+    {% for i in range(count) %}
+      &lt;li&gt;第 {{ i + 1 }} 条&lt;/li&gt;
+    {% endfor %}
+  &lt;/ul&gt;
+  {% if count == 0 %}
+    &lt;p&gt;暂无数据&lt;/p&gt;
+  {% endif %}
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：模板引擎</div>
+          <p>Jinja2 的 <code class="inline">{{ }}</code>/<code class="inline">{% %}</code> 对应 Vue 的 <code class="inline">{{ }}</code> 插值与 <code class="inline">v-for/v-if</code> 指令，或 React 的 JSX 表达式。区别在于 Jinja2 在<strong>服务器端</strong>渲染好 HTML 再发给浏览器，而 Vue/React 通常在<strong>客户端</strong>渲染（或 SSR）。两者可结合：Flask 提供 API，前端框架渲染界面。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// Vue 模板写法（对应 Jinja2 的思路）
+&lt;template&gt;
+  &lt;ul&gt;
+    &lt;li v-for="(item, i) in items" :key="i"&gt;第 {{ i + 1 }} 条&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/template&gt;
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="request" id="request">请求与响应</h2>
+        <p>视图函数通过全局对象 <code class="inline">request</code> 读取请求数据（查询参数、表单、JSON body、头部），通过返回值或 <code class="inline">Response</code>/<code class="inline">jsonify</code> 控制响应。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">from flask import Flask, request, jsonify, redirect, url_for
+
+app = Flask(__name__)
+
+@app.route("/search")
+def search():
+    # 读取查询参数 ?q=python&amp;page=2
+    q = request.args.get("q", "")
+    page = request.args.get("page", 1, type=int)
+    return f"搜索：{q}，第 {page} 页"
+
+@app.route("/api/data", methods=["POST"])
+def api_data():
+    # 读取 JSON 请求体
+    data = request.get_json()
+    return jsonify({"echo": data, "ok": True})   # 返回 JSON 响应
+
+@app.route("/old")
+def old():
+    # 重定向到另一个路由
+    return redirect(url_for("home"))</code></pre>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">项目案例：待办清单网站（核心）</div>
+          <p>把路由、模板、请求串起来，做一个能用浏览器增删待办的小网站。本例用内存列表存数据（数据库在下一章接入）：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python"># app.py
+from flask import Flask, render_template, request, redirect, url_for
+
+app = Flask(__name__)
+todos = []                       # 暂用内存列表存储
+
+@app.route("/")
+def index():
+    return render_template("index.html", todos=todos)
+
+@app.route("/add", methods=["POST"])
+def add():
+    task = request.form.get("task", "").strip()
+    if task:
+        todos.append({"task": task, "done": False})
+    return redirect(url_for("index"))     # PRG 模式：提交后重定向
+
+@app.route("/done/&lt;int:i&gt;")
+def done(i):
+    if 0 &lt;= i &lt; len(todos):
+        todos[i]["done"] = not todos[i]["done"]
+    return redirect(url_for("index"))
+
+@app.route("/delete/&lt;int:i&gt;")
+def delete(i):
+    if 0 &lt;= i &lt; len(todos):
+        todos.pop(i)
+    return redirect(url_for("index"))
+
+if __name__ == "__main__":
+    app.run(debug=True)</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">HTML</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-html">&lt;!-- templates/index.html --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"&gt;&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;我的待办&lt;/h1&gt;
+  &lt;form method="post" action="{{ url_for('add') }}"&gt;
+    &lt;input name="task" placeholder="输入任务" required&gt;
+    &lt;button&gt;添加&lt;/button&gt;
+  &lt;/form&gt;
+  &lt;ul&gt;
+    {% for t in todos %}
+    &lt;li class="{{ 'done' if t.done else '' }}"&gt;
+      {{ t.task }}
+      &lt;a href="{{ url_for('done', i=loop.index0) }}"&gt;完成&lt;/a&gt;
+      &lt;a href="{{ url_for('delete', i=loop.index0) }}"&gt;删除&lt;/a&gt;
+    &lt;/li&gt;
+    {% endfor %}
+  &lt;/ul&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+          </div>
+          <p>启动后访问 <code class="inline">http://127.0.0.1:5000</code>，即可在浏览器里增删待办。这是从"脚本"到"应用"的关键一跃。</p>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>表单提交后用 <code class="inline">redirect</code> 而非直接渲染，这叫 <strong>PRG 模式</strong>（Post/Redirect/Get），可避免用户刷新页面时重复提交。这是 Web 开发的经典最佳实践。</p>
+        </div>
+
+        <h2 data-section="form" id="form">表单处理</h2>
+        <p>表单是用户向服务器提交数据的主要方式。GET 用于查询（参数在 URL），POST 用于提交（数据在 body）。处理表单时务必做<strong>校验与清洗</strong>，防止空值、超长、注入。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">from flask import Flask, request, render_template
+
+app = Flask(__name__)
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    error = None
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        # 服务端校验（不能只靠前端 JS）
+        if not username or len(username) &lt; 3:
+            error = "用户名至少 3 个字符"
+        elif len(password) &lt; 6:
+            error = "密码至少 6 位"
+        else:
+            return "注册成功，欢迎 " + username
+    # GET 或校验失败时回到表单页
+    return render_template("register.html", error=error)</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p><strong>永远不要信任前端校验</strong>。HTML 的 <code class="inline">required</code>、JS 校验只是体验，用户可绕过。服务端必须再做一次校验，这是安全的第一道防线（详见认证与安全章）。</p>
+        </div>
+
+        <div class="keypoints">
+          <div class="keypoints-label">本章核心要点</div>
+          <ul>
+            <li>Web 应用 = "请求—响应"循环；框架屏蔽 HTTP 细节，让你专注业务。</li>
+            <li>Flask 用 <code class="inline">@app.route</code> 把 URL 绑定到视图函数，<code class="inline">&lt;int:id&gt;</code> 捕获动态参数。</li>
+            <li>Jinja2 模板用 <code class="inline">{{ }}</code> 插值、<code class="inline">{% %}</code> 控制流，实现数据与视图分离。</li>
+            <li><code class="inline">request</code> 读请求数据，<code class="inline">jsonify/redirect/render_template</code> 控制响应。</li>
+            <li>表单提交后用 <strong>PRG 重定向</strong>避免重复提交；服务端必须校验。</li>
+            <li><code class="inline">debug=True</code> 仅限开发，生产用 Gunicorn 部署。</li>
+          </ul>
+        </div>
+
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>跑通最小应用</strong> — 按步骤建项目、装 Flask、写 <code class="inline">app.py</code>，浏览器看到 Hello, Flask。</li>
+            <li><strong>完成待办清单</strong> — 复刻本章案例，实现添加/完成/删除，并加 CSS 美化已完成项。</li>
+            <li><strong>注册表单</strong> — 实现带服务端校验的注册页，失败时回显错误与已填用户名。</li>
+            <li><strong>动态路由练习</strong> — 做 <code class="inline">/user/&lt;name&gt;</code> 个人页，模板展示该用户的欢迎信息与待办。</li>
+          </ol>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="asyncio.html">
+            <span class="nav-label">← 上一章</span>
+            <span class="nav-title">第十八章：异步 IO</span>
+          </a>
+          <a href="database.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第二十章：数据库与 ORM</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand"><h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3><p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p></div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p><p>Built with HTML, CSS &amp; JavaScript</p></div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

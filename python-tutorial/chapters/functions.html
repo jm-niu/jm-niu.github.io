@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第五章：函数 — Python 学习教程</title>
+  <meta name="description" content="Python函数教程，学习函数定义、参数传递、作用域、闭包和装饰器。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo"><span>Python</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#define" class="active">函数定义</a></li>
+          <li><a href="#params">参数类型</a></li>
+          <li><a href="#scope">作用域</a></li>
+          <li><a href="#lambda">Lambda 表达式</a></li>
+          <li><a href="#closure">闭包与装饰器</a></li>
+          <li><a href="#recursion">递归函数</a></li>
+          <li><a href="#unpacking">参数解包</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a><span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a><span class="separator">/</span>
+          <span>函数</span>
+        </div>
+
+        <h1>第五章：函数</h1>
+        <div class="chapter-meta">
+          <span>难度：进阶</span>
+          <span>预计学习时间：2 周</span>
+          <span>前置知识：基础语法、数据类型、控制流</span>
+        </div>
+
+        <p>函数是组织好的、可复用的代码块。掌握函数是编写可维护代码的关键一步。本章将系统讲解 Python 函数的定义、参数传递、作用域规则，以及闭包和装饰器等高级特性。</p>
+
+        <div class="path-hint">
+          <span class="path-chip">先理解"函数是一等对象"</span>
+          <span class="path-chip">掌握 def 定义与 return 返回值</span>
+          <span class="path-chip">吃透 5 种参数传递方式</span>
+          <span class="path-chip">厘清 LEGB 作用域规则</span>
+          <span class="path-chip">进阶：闭包 · 装饰器 · 递归</span>
+        </div>
+
+        <h2 data-section="define" id="define">函数定义与调用</h2>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 基本函数定义
+def greet(name):
+    """向指定的人打招呼"""
+    return f"Hello, {name}!"
+
+message = greet("Alice")
+print(message)  # Hello, Alice!
+
+# 无返回值的函数 (返回 None)
+def print_info(info):
+    print(f"信息: {info}")
+
+# 返回多个值 (实际返回元组)
+def min_max(numbers):
+    return min(numbers), max(numbers)
+
+low, high = min_max([3, 1, 4, 1, 5])
+print(f"最小: {low}, 最大: {high}")
+
+# 文档字符串 (docstring)
+print(greet.__doc__)  # 向指定的人打招呼</code></pre>
+        </div>
+
+        <h3>从零掌握函数：4 个步骤</h3>
+        <ul class="steps">
+          <li class="step-item">
+            <h4>定义函数（def）</h4>
+            <p>用 <code class="inline">def 函数名(参数):</code> 声明，函数体缩进。给函数写 docstring 说明用途，这是专业代码的基本功。</p>
+          </li>
+          <li class="step-item">
+            <h4>设计参数</h4>
+            <p>先想清楚"需要外部提供什么"：用位置参数接收必填项，默认参数给可选项兜底，<code class="inline">*args</code>/<code class="inline">**kwargs</code> 应对不定数量。</p>
+          </li>
+          <li class="step-item">
+            <h4>用 return 返回结果</h4>
+            <p>函数通过 <code class="inline">return</code> 把计算结果"交还"给调用者；<strong>return 一执行函数立即结束</strong>。没有 return 时函数隐式返回 <code class="inline">None</code>。</p>
+          </li>
+          <li class="step-item">
+            <h4>理解作用域（LEGB）</h4>
+            <p>函数内访问变量时，Python 按 Local → Enclosing → Global → Built-in 顺序查找。局部变量不会污染外部，必要时用 <code class="inline">global</code>/<code class="inline">nonlocal</code> 声明。</p>
+          </li>
+        </ul>
+
+        <h2 data-section="params" id="params">参数类型</h2>
+        <p>Python 函数支持多种灵活的参数传递方式：</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 1. 位置参数 — 按顺序传递
+def power(base, exp):
+    return base ** exp
+print(power(2, 3))  # 8
+
+# 2. 默认参数 — 有默认值，可省略
+def greet(name, greeting="Hello"):
+    return f"{greeting}, {name}!"
+print(greet("Bob"))              # Hello, Bob!
+print(greet("Bob", "Hi"))         # Hi, Bob!
+
+# 3. 关键字参数 — 按名称传递，顺序任意
+print(greet(greeting="Hey", name="Carol"))
+
+# 4. *args — 收集多余的位置参数为元组
+def sum_all(*args):
+    return sum(args)
+print(sum_all(1, 2, 3, 4, 5))  # 15
+
+# 5. **kwargs — 收集多余的关键字参数为字典
+def create_user(**kwargs):
+    return kwargs
+print(create_user(name="Alice", age=25, role="admin"))
+
+# 6. 参数顺序：位置 → 默认 → *args → **kwargs
+def func(a, b=10, *args, **kwargs):
+    print(f"a={a}, b={b}, args={args}, kwargs={kwargs}")
+
+# 7. 仅关键字参数 — * 之后的参数必须用关键字
+def connect(host, port, *, timeout=30, retry=3):
+    print(f"{host}:{port} timeout={timeout}")
+connect("localhost", 8080, timeout=60)</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>永远不要使用可变对象（如列表、字典）作为默认参数值。默认参数只在函数定义时求值一次，多次调用会共享同一个对象。正确做法：<code class="inline">def func(items=None): items = items or []</code></p>
+        </div>
+
+        <h3>实战场景：可复用的数据处理函数库</h3>
+        <div class="scenario">
+          <div class="scenario-label">实际场景：清洗用户输入并计算统计指标</div>
+          <p>真实项目中，函数最常见的价值是"把零散、脏乱的数据处理封装成可反复调用的工具"。例如一个接收用户原始输入的模块：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">from statistics import mean
+
+def clean_name(raw):
+    """清洗姓名：去首尾空格、统一首字母大写"""
+    return raw.strip().title() if raw else ""
+
+def parse_scores(raw, sep=","):
+    """把 '90, 85, 92' 这样的字符串解析为数字列表，跳过非法值"""
+    scores = []
+    for item in raw.split(sep):
+        item = item.strip()
+        if item.replace(".", "", 1).isdigit():   # 允许小数
+            scores.append(float(item))
+    return scores
+
+def summarize(scores):
+    """计算统计指标，空列表返回 None 避免除零"""
+    if not scores:
+        return None
+    return {"count": len(scores), "avg": round(mean(scores), 2),
+            "max": max(scores), "min": min(scores)}
+
+# 使用：同一套函数处理任意多条记录
+records = [
+    ("  alice ", "90, 85, 92"),
+    ("Bob", "78, , 88"),
+    ("", "100"),
+]
+for name, raw in records:
+    name = clean_name(name)
+    scores = parse_scores(raw)
+    stat = summarize(scores)
+    print(f"{name or '匿名'}: {stat}")</code></pre>
+          </div>
+          <p><strong>为什么这样设计？</strong> 每个函数只做一件事（单一职责），彼此通过返回值传递数据，没有共享可变状态。<code class="inline">parse_scores</code> 对非法值做了容错，<code class="inline">summarize</code> 在空数据时返回 <code class="inline">None</code> 而非抛异常 —— 这正是"健壮函数"的写法。把这三段逻辑塞进一个大循环会难以测试与复用，而拆成函数后，每一段都能单独被单元测试覆盖。</p>
+        </div>
+
+        <div class="figure">
+          <svg viewBox="0 0 570 210" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <defs>
+              <marker id="arrowDT" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L8,3 L0,6 Z" fill="#e74c3c"/>
+              </marker>
+              <marker id="arrowDTok" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L8,3 L0,6 Z" fill="#27ae60"/>
+              </marker>
+            </defs>
+            <rect x="20" y="20" width="170" height="42" rx="6" fill="#eef6ff" stroke="#3776AB" stroke-width="2"/>
+            <text x="105" y="46" text-anchor="middle" font-size="13" fill="#2c3e50">def f(x=[])</text>
+            <text x="30" y="82" font-size="12" fill="#6c7a89">默认参数只求值一次</text>
+            <line x1="105" y1="62" x2="105" y2="105" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrowDT)"/>
+            <rect x="65" y="105" width="80" height="45" rx="6" fill="#fff" stroke="#e74c3c" stroke-width="2"/>
+            <text x="105" y="133" text-anchor="middle" font-size="12" fill="#2c3e50">[] 共享对象</text>
+            <text x="160" y="125" font-size="12" fill="#e74c3c">两次 f() 指向它</text>
+            <text x="160" y="143" font-size="12" fill="#e74c3c">→ 数据互相污染</text>
+            <rect x="300" y="25" width="240" height="48" rx="6" fill="#fff" stroke="#3776AB" stroke-width="2"/>
+            <text x="310" y="46" font-size="12" fill="#2c3e50">正确写法：def f(x=None):</text>
+            <text x="310" y="66" font-size="12" fill="#27ae60">x = x or []  # 每次新建</text>
+            <line x1="420" y1="73" x2="420" y2="105" stroke="#27ae60" stroke-width="2" marker-end="url(#arrowDTok)"/>
+            <rect x="380" y="105" width="80" height="45" rx="6" fill="#eafaf0" stroke="#27ae60" stroke-width="2"/>
+            <text x="420" y="133" text-anchor="middle" font-size="12" fill="#2c3e50">[] 独立</text>
+            <text x="160" y="190" font-size="12" fill="#27ae60">✓ 每次调用得到全新列表，互不影响</text>
+          </svg>
+          <p class="figure-caption">示意图：可变默认参数的陷阱 —— <code class="inline">x=[]</code> 只在定义时绑定一次对象，多次调用共享同一列表；改用 <code class="inline">x=None</code> 占位、函数内再初始化即可避免污染。</p>
+        </div>
+
+        <h2 data-section="scope" id="scope">作用域 (LEGB 规则)</h2>
+        <p>Python 查找变量时遵循 LEGB 规则：Local → Enclosing → Global → Built-in。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">x = "global"  # Global 作用域
+
+def outer():
+    x = "enclosing"  # Enclosing 作用域
+    
+    def inner():
+        x = "local"  # Local 作用域
+        print(x)     # 'local' — 找到 Local
+    
+    inner()
+    print(x)  # 'enclosing'
+
+outer()
+print(x)  # 'global'
+
+# global 关键字 — 修改全局变量
+counter = 0
+def increment():
+    global counter
+    counter += 1
+
+# nonlocal 关键字 — 修改外层函数变量
+def make_counter():
+    count = 0
+    def counter():
+        nonlocal count
+        count += 1
+        return count
+    return counter</code></pre>
+        </div>
+
+        <h2 data-section="lambda" id="lambda">Lambda 表达式与高阶函数</h2>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># lambda — 匿名函数，适合简单的单行操作
+square = lambda x: x ** 2
+print(square(5))  # 25
+
+# 常用于排序的 key 参数
+students = [
+    {"name": "Alice", "score": 90},
+    {"name": "Bob", "score": 85},
+    {"name": "Carol", "score": 92},
+]
+sorted_students = sorted(students, key=lambda s: s["score"], reverse=True)
+
+# map — 对每个元素应用函数
+numbers = [1, 2, 3, 4, 5]
+squared = list(map(lambda x: x**2, numbers))
+print(squared)  # [1, 4, 9, 16, 25]
+
+# filter — 过滤元素
+evens = list(filter(lambda x: x % 2 == 0, numbers))
+print(evens)  # [2, 4]
+
+# reduce — 累积计算
+from functools import reduce
+product = reduce(lambda a, b: a * b, numbers)
+print(product)  # 120</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：函数对比</div>
+          <p>Python 的 <code class="inline">def</code> 对应 JS 的 <code class="inline">function</code> 或箭头函数。Python 的 <code class="inline">*args</code> = JS 的 rest 参数 <code class="inline">...args</code>，<code class="inline">**kwargs</code> = JS 的解构对象 <code class="inline">{...options}</code>。Python 装饰器 <code class="inline">@decorator</code> 在 JS 中没有语法糖等价物，需要手动调用高阶函数包装。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS 函数 — 与 Python 对照
+// 默认参数 + 解构 (类似 **kwargs)
+function createUser(name, options = {}) {
+  return { name, ...options };
+}
+console.log(createUser("Alice", { age: 25, role: "admin" }));
+
+// 箭头函数 (类似简单 def)
+const square = x => x ** 2;        // 类似: square = lambda x: x**2
+
+// map / filter (完全一致)
+[1,2,3,4,5].map(x => x**2).filter(x => x % 2 === 0);
+
+// 装饰器模式 (手动实现)
+function logCalls(fn) {
+  return function(...args) {
+    console.log(`调用 ${fn.name}(${args})`);
+    const result = fn(...args);
+    return result;
+  };
+}
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="closure" id="closure">闭包与装饰器</h2>
+        <p>闭包是函数式编程的重要概念，装饰器是闭包的经典应用。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 闭包 — 内部函数引用外部函数的变量
+def make_multiplier(factor):
+    def multiply(n):
+        return n * factor  # 引用外部变量 factor
+    return multiply
+
+double = make_multiplier(2)
+triple = make_multiplier(3)
+print(double(5))   # 10
+print(triple(5))   # 15
+
+# 装饰器 — 在不修改原函数的前提下扩展功能
+def log_calls(func):
+    def wrapper(*args, **kwargs):
+        print(f"调用 {func.__name__}({args}, {kwargs})")
+        result = func(*args, **kwargs)
+        print(f"返回: {result}")
+        return result
+    return wrapper
+
+@log_calls
+def add(a, b):
+    return a + b
+
+add(3, 5)
+# 输出:
+# 调用 add((3, 5), {})
+# 返回: 8
+
+# 带参数的装饰器
+def repeat(times):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            for _ in range(times):
+                func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@repeat(times=3)
+def say_hello():
+    print("Hello!")
+say_hello()  # 打印3次 Hello!</code></pre>
+        </div>
+
+        <!-- Recursion -->
+        <h2 data-section="recursion">递归函数</h2>
+        <p>递归是函数直接或间接调用自身的方法。每个递归都需要<strong>基线条件（base case）</strong>来终止，否则会无限递归直到栈溢出。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 阶乘 — n! = n * (n-1)!
+def factorial(n):
+    if n &lt;= 1:              # 基线条件
+        return 1
+    return n * factorial(n - 1)
+
+print(factorial(5))   # 120
+
+# 斐波那契 — 经典但重复计算多
+def fib(n):
+    if n &lt;= 1:             # 基线条件
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+print([fib(i) for i in range(10)])  # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+
+# 递归深度限制 — 默认约 1000 层
+import sys
+print(sys.getrecursionlimit())       # 1000
+
+# 调整上限（谨慎，过深会真栈溢出）
+# sys.setrecursionlimit(2000)
+
+# 尾递归优化版本（Python 不会真正尾优化，但更省栈）
+def fib_tail(n, a=0, b=1):
+    if n == 0:
+        return a
+    return fib_tail(n - 1, b, a + b)
+
+print(fib_tail(10))   # 55</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>Python 不做尾递归优化，递归深度受 <code class="inline">sys.getrecursionlimit()</code> 限制，过深会抛 <code class="inline">RecursionError</code>。处理大规模数据优先用循环或 <code class="inline">functools.lru_cache</code> 缓存，避免重复计算（如朴素斐波那契）。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：递归</div>
+          <p>JS 的递归与 Python 写法一致。典型场景是树或目录遍历：用递归深入每个子节点。两者都没有自动尾递归优化，深度过大同样会栈溢出。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS 写法 — 遍历文件树 (递归)
+function countFiles(node) {
+  if (node.type === "file") return 1;        // 基线条件
+  return node.children.reduce(
+    (sum, child) =&gt; sum + countFiles(child), 0
+  );
+}
+
+// 阶乘递归 (同 Python)
+function factorial(n) {
+  return n &lt;= 1 ? 1 : n * factorial(n - 1);
+}
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Unpacking -->
+        <h2 data-section="unpacking">参数解包</h2>
+        <p>调用函数时可用 <code class="inline">*iterable</code> 把列表/元组解包成位置参数，用 <code class="inline">**dict</code> 把字典解包成关键字参数；定义或合并容器时 <code class="inline">*</code>、<code class="inline">**</code> 也能用于合并。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">def add(a, b, c):
+    return a + b + c
+
+# * 解包列表/元组为位置参数
+nums = [1, 2, 3]
+print(add(*nums))        # 6 — 等价于 add(1, 2, 3)
+
+# ** 解包字典为关键字参数
+kwargs = {"a": 1, "b": 2, "c": 3}
+print(add(**kwargs))     # 6 — 等价于 add(a=1, b=2, c=3)
+
+# 合并列表 / 字典
+list_a = [1, 2, 3]
+list_b = [4, 5]
+merged = [*list_a, *list_b]     # [1, 2, 3, 4, 5]
+
+dict_a = {"x": 1}
+dict_b = {"y": 2}
+combined = {**dict_a, **dict_b} # {'x': 1, 'y': 2}
+
+# 解包接收多余元素
+first, *rest = [10, 20, 30, 40]
+print(first, rest)       # 10 [20, 30, 40]</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>调用时 <code class="inline">*</code>/<code class="inline">**</code> 用于"展开"参数；定义函数时 <code class="inline">*args</code>/<code class="inline">**kwargs</code> 用于"收集"参数（见上文「参数类型」）。两者方向相反但符号相同。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：展开运算符</div>
+          <p>Python 的 <code class="inline">*args</code> 调用解包对应 JS 的 <code class="inline">...</code> 展开运算符（rest/spread），<code class="inline">**kwargs</code> 解包对应 JS 的对象展开 <code class="inline">...obj</code>。符号一致，含义也高度相似。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS 写法 — 展开运算符 ...
+function add(a, b, c) { return a + b + c; }
+
+const nums = [1, 2, 3];
+console.log(add(...nums));        // 6 (同 Python add(*nums))
+
+const dictA = { x: 1 }, dictB = { y: 2 };
+const combined = { ...dictA, ...dictB }; // 同 Python {**a, **b}
+
+const [first, ...rest] = [10, 20, 30, 40];
+console.log(first, rest);         // 10 [20, 30, 40]
+</code></pre>
+          </div>
+        </div>
+
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>密码生成器</strong> — 编写函数生成指定长度的随机密码，支持参数控制是否包含大小写字母、数字和特殊字符。</li>
+            <li><strong>递归实现斐波那契</strong> — 用递归函数实现斐波那契数列，并添加缓存装饰器优化性能。</li>
+            <li><strong>计时装饰器</strong> — 编写一个装饰器，自动测量并打印被装饰函数的执行时间。</li>
+            <li><strong>Markdown 转换器</strong> — 编写函数将简单的 Markdown 文本（标题、粗体、链接）转换为 HTML。</li>
+          </ol>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="controlflow.html">
+            <span class="nav-label">← 上一章</span>
+            <span class="nav-title">第三章：控制流</span>
+          </a>
+          <a href="advanced.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第六章：高级特性</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand"><h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3><p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p></div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p><p>Built with HTML, CSS &amp; JavaScript</p></div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

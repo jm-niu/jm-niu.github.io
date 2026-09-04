@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二十二章：RESTful API 设计 — Python 学习教程</title>
+  <meta name="description" content="Python RESTful API 设计教程：资源建模、蓝图组织、序列化、统一错误处理、API 文档与前后端协作，含项目案例与示意图。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo"><span>Python</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#rest" class="active">RESTful 理念</a></li>
+          <li><a href="#blueprint">蓝图组织</a></li>
+          <li><a href="#serialize">序列化与校验</a></li>
+          <li><a href="#error">统一错误处理</a></li>
+          <li><a href="#doc">API 文档</a></li>
+          <li><a href="#frontend">前后端协作</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a><span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a><span class="separator">/</span>
+          <span>API 设计</span>
+        </div>
+
+        <h1>第二十二章：RESTful API 设计</h1>
+        <div class="chapter-meta">
+          <span>难度：进阶</span>
+          <span>预计学习时间：1 周</span>
+          <span>前置知识：Web 开发、数据库、认证与安全</span>
+        </div>
+
+        <p>现代 Web 多采用<strong>前后端分离</strong>：后端只提供数据 API，前端（Vue/React/移动端）负责界面。本章讲解如何设计一套规范、好用、可维护的 <strong>RESTful API</strong>，包括资源建模、蓝图拆分、序列化校验、统一错误处理与文档生成，并说明前后端如何协作。</p>
+
+        <div class="path-hint">
+          <span class="path-chip">理解 RESTful 资源</span>
+          <span class="path-chip">用蓝图组织模块</span>
+          <span class="path-chip">序列化 + 统一错误</span>
+          <span class="path-chip">生成文档与协作</span>
+        </div>
+
+        <h2 data-section="rest" id="rest">RESTful 理念</h2>
+        <p>REST 的核心是<strong>把一切视为"资源"</strong>，用 URL 标识资源、用 HTTP 方法表达动作、用状态码表达结果。它让 API 直观、统一、可预测。</p>
+
+        <div class="figure">
+          <svg viewBox="0 0 580 180" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <rect x="20" y="20" width="540" height="30" rx="4" fill="#eef6ff" stroke="#3776AB"/>
+            <text x="40" y="40" font-size="12" fill="#2c3e50">GET    /todos</text>
+            <text x="320" y="40" font-size="12" fill="#6c7a89">→ 列出所有待办（200）</text>
+            <rect x="20" y="55" width="540" height="30" rx="4" fill="#fff" stroke="#3776AB"/>
+            <text x="40" y="75" font-size="12" fill="#2c3e50">POST   /todos</text>
+            <text x="320" y="75" font-size="12" fill="#6c7a89">→ 新建一条（201）</text>
+            <rect x="20" y="90" width="540" height="30" rx="4" fill="#fff" stroke="#3776AB"/>
+            <text x="40" y="110" font-size="12" fill="#2c3e50">GET    /todos/42</text>
+            <text x="320" y="110" font-size="12" fill="#6c7a89">→ 取一条（200 / 404）</text>
+            <rect x="20" y="125" width="540" height="30" rx="4" fill="#fff" stroke="#3776AB"/>
+            <text x="40" y="145" font-size="12" fill="#2c3e50">DELETE /todos/42</text>
+            <text x="320" y="145" font-size="12" fill="#6c7a89">→ 删除一条（204 / 404）</text>
+          </svg>
+          <p class="figure-caption">示意图：RESTful 路由约定 —— 同一个资源 <code class="inline">/todos</code>，用不同 HTTP 方法表达"查/增/取/删"，URL 名词化、方法动词化。</p>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>常用状态码：<code class="inline">200</code> 成功、<code class="inline">201</code> 已创建、<code class="inline">204</code> 无内容（删除成功）、<code class="inline">400</code> 请求错误、<code class="inline">401</code> 未认证、<code class="inline">403</code> 无权限、<code class="inline">404</code> 不存在、<code class="inline">422</code> 校验失败、<code class="inline">500</code> 服务器错误。用对状态码，前端就能统一处理。</p>
+        </div>
+
+        <h2 data-section="blueprint" id="blueprint">蓝图组织</h2>
+        <p>项目变大后把所有路由塞在一个文件会失控。Flask 的<strong>蓝图（Blueprint）</strong>把相关路由分组到模块，便于管理和注册，类似前端的"路由模块化"。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># todos.py — 待办蓝图
+from flask import Blueprint, request, jsonify
+from .models import db, Todo
+
+bp = Blueprint("todos", __name__, url_prefix="/api/todos")
+
+@bp.get("")
+def list_todos():
+    items = Todo.query.all()
+    return jsonify([t.to_dict() for t in items])
+
+@bp.post("")
+def create_todo():
+    data = request.get_json()
+    t = Todo(task=data["task"])
+    db.session.add(t); db.session.commit()
+    return jsonify(t.to_dict()), 201
+
+@bp.delete("/&lt;int:tid&gt;")
+def delete_todo(tid):
+    t = Todo.query.get_or_404(tid)
+    db.session.delete(t); db.session.commit()
+    return "", 204</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># app.py — 注册蓝图
+from flask import Flask
+from .models import db
+from .todos import bp as todos_bp
+
+def create_app():
+    app = Flask(__name__)
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todo.db"
+    db.init_app(app)
+    app.register_blueprint(todos_bp)        # 挂载 /api/todos
+    return app</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：路由模块化</div>
+          <p>蓝图类似 Vue Router / Express Router 的"子路由模块"：把一组相关路由封装，再挂到主应用。前端用 <code class="inline">router.use('/todos', todosRouter)</code>，后端用 <code class="inline">app.register_blueprint(todos_bp)</code>，思路完全一致。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// Express 路由模块（与 Flask 蓝图同理）
+const router = require("express").Router();
+router.get("/", (req, res) => res.json([]));
+router.post("/", (req, res) => res.status(201).json({}));
+app.use("/api/todos", router);
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="serialize" id="serialize">序列化与校验</h2>
+        <p>API 返回的 JSON 要<strong>序列化</strong>（对象 → dict → JSON），且不能把内部字段（如密码哈希）泄露出去；接收的输入要<strong>校验</strong>。用 <code class="inline">marshmallow</code> 或 <code class="inline">pydantic</code> 可规范完成。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-bash">pip install marshmallow</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">from marshmallow import Schema, fields, validate
+
+# 序列化 schema：定义对外字段与校验规则
+class TodoSchema(Schema):
+    id = fields.Int(dump_only=True)                       # 只输出
+    task = fields.Str(required=True, validate=validate.Length(min=1, max=120))
+    done = fields.Boolean(load_default=False)
+
+todo_schema = TodoSchema()
+todos_schema = TodoSchema(many=True)
+
+# 输出：obj → dict
+todo_schema.dump(todo_obj)
+# 输入校验：dict → 校验后 dict，失败抛 ValidationError
+todo_schema.load(request.get_json())</code></pre>
+        </div>
+
+        <h2 data-section="error" id="error">统一错误处理</h2>
+        <p>好的 API 用<strong>统一的错误格式</strong>返回，便于前端解析与展示。Flask 用全局错误处理器把异常转成统一 JSON。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">from flask import Flask, jsonify
+from werkzeug.exceptions import HTTPException
+from marshmallow import ValidationError
+
+app = Flask(__name__)
+
+# 统一 HTTP 异常格式
+@app.errorhandler(HTTPException)
+def handle_http(e):
+    return jsonify({"code": e.code, "msg": e.name, "detail": e.description}), e.code
+
+# 校验失败 → 422
+@app.errorhandler(ValidationError)
+def handle_validation(e):
+    return jsonify({"code": 422, "msg": "参数校验失败", "errors": e.messages}), 422
+
+# 兜底：未捕获异常
+@app.errorhandler(Exception)
+def handle_all(e):
+    app.logger.exception(e)
+    return jsonify({"code": 500, "msg": "服务器内部错误"}), 500</code></pre>
+        </div>
+
+        <h2 data-section="doc" id="doc">API 文档</h2>
+        <p>API 是给别的开发者用的，文档与接口同等重要。<strong>OpenAPI/Swagger</strong> 是事实标准，能自动生成交互式文档页，让人直接在浏览器里试调。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-bash">pip install flask-smorest    # Flask 的 OpenAPI 文档生成</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">from flask_smorest import Api, Blueprint
+api = Api(app, title="Todo API", version="v1")
+# 用 @blp.doc(...) + Schema 装饰路由，自动生成 /swagger-ui 页面
+# 访问 /api/swagger.json 看 OpenAPI 描述，/api/docs 看交互文档</code></pre>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">项目案例：完整待办 API + 前端调用</div>
+          <p>把待办做成纯 API 服务，再用 Vue/原生 fetch 调用，实现前后端分离：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// 前端调用 RESTful API
+async function loadTodos() {
+  const res = await fetch("/api/todos", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error("加载失败");
+  return res.json();          // [{id, task, done}, ...]
+}
+
+async function addTodo(task) {
+  const res = await fetch("/api/todos", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ task })
+  });
+  return res.json();          // 201 + 新建对象
+}</code></pre>
+          </div>
+          <p>后端只管数据与规则，前端只管界面与交互，两边通过 JSON 契约协作，互不耦合。</p>
+        </div>
+
+        <h2 data-section="frontend" id="frontend">前后端协作</h2>
+        <ul class="steps">
+          <li class="step-item">
+            <h4>约定契约</h4>
+            <p>先定 OpenAPI 文档（路径、字段、状态码），前后端据此并行开发，避免"你等我"。</p>
+          </li>
+          <li class="step-item">
+            <h4>跨域 (CORS)</h4>
+            <p>前端与后端不同源时，后端要开启 CORS 允许跨域：<code class="inline">flask-cors</code>。</p>
+          </li>
+          <li class="step-item">
+            <h4>Mock 与联调</h4>
+            <p>后端未完成时，前端用 Mock 数据开发；接口就绪后切换真实地址联调。</p>
+          </li>
+          <li class="step-item">
+            <h4>版本化</h4>
+            <p>URL 加版本前缀 <code class="inline">/api/v1/todos</code>，迭代时旧版仍可用，平滑迁移。</p>
+          </li>
+        </ul>
+
+        <div class="keypoints">
+          <div class="keypoints-label">本章核心要点</div>
+          <ul>
+            <li>REST：资源用 URL 名词，动作用 HTTP 方法，结果用状态码。</li>
+            <li>用<strong>蓝图</strong>模块化路由，<code class="inline">register_blueprint</code> 挂载。</li>
+            <li><strong>序列化</strong>控制对外字段，<strong>校验</strong>拦截非法输入（marshmallow/pydantic）。</li>
+            <li><strong>统一错误格式</strong> + 全局处理器，前端可一致处理。</li>
+            <li>用 <strong>OpenAPI/Swagger</strong> 自动生成可交互文档。</li>
+            <li>前后端分离靠 JSON 契约协作，注意 CORS 与版本化。</li>
+          </ul>
+        </div>
+
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>REST 化</strong> — 把待办网站改成纯 JSON API，用 GET/POST/DELETE 完成增删查。</li>
+            <li><strong>蓝图拆分</strong> — 把用户与待办拆成两个蓝图，各自独立文件。</li>
+            <li><strong>校验+错误</strong> — 接入 marshmallow 校验，统一错误返回 422。</li>
+            <li><strong>文档</strong> — 用 flask-smorest 生成 Swagger，在浏览器试调每个接口。</li>
+          </ol>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="auth-security.html">
+            <span class="nav-label">← 上一章</span>
+            <span class="nav-title">第二十一章：认证与安全</span>
+          </a>
+          <a href="deploy.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第二十三章：部署与 CI/CD</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand"><h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3><p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p></div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p><p>Built with HTML, CSS &amp; JavaScript</p></div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

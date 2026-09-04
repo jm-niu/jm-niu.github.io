@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十章：面向对象高级编程 — Python 学习教程</title>
+  <meta name="description" content="Python面向对象高级编程教程，学习__slots__、@property、MixIn多重继承、定制类特殊方法、枚举类与元类。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <span>Python</span>
+      </a>
+      <button class="nav-toggle" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <!-- Sidebar -->
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#slots" class="active">__slots__</a></li>
+          <li><a href="#property">@property</a></li>
+          <li><a href="#mixin">多重继承与 MixIn</a></li>
+          <li><a href="#dunder">定制类</a></li>
+          <li><a href="#enum">枚举类</a></li>
+          <li><a href="#metaclass">元类简介</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a>
+          <span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a>
+          <span class="separator">/</span>
+          <span>面向对象高级编程</span>
+        </div>
+
+        <h1>第十章：面向对象高级编程</h1>
+        <div class="chapter-meta">
+          <span>难度：高级</span>
+          <span>预计学习时间：1-2 周</span>
+          <span>前置知识：面向对象编程基础</span>
+        </div>
+
+        <p>掌握了类与对象的基本概念后，本章深入 Python 面向对象的高级特性：用 <code class="inline">__slots__</code> 节省内存、用 <code class="inline">@property</code> 优雅地封装属性、用 MixIn 组合能力、用特殊方法让类更"Pythonic"，以及枚举类与元类这些进阶工具。</p>
+
+        <!-- __slots__ -->
+        <h2 data-section="slots">__slots__ 限制实例属性</h2>
+        <p>默认情况下，每个实例的属性都存在各自的 <code class="inline">__dict__</code> 字典里，灵活但占用内存。当你需要创建成千上万个实例时，可以用 <code class="inline">__slots__</code> 声明允许的属性名，从而禁止动态添加属性并大幅减少内存开销。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">class Student:
+    __slots__ = ("name", "age")   # 只允许这两个实例属性
+
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+s = Student("Alice", 18)
+s.name = "Bob"          # 正常
+# s.score = 99         # AttributeError: 'Student' 对象没有 'score' 属性
+</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p><code class="inline">__slots__</code> 适合属性固定、实例极多的场景（如数据记录类）。但带 <code class="inline">__slots__</code> 的类不能再动态添加属性，也略微增加了理解成本，普通业务类不必滥用。</p>
+        </div>
+
+        <!-- @property -->
+        <h2 data-section="property">@property 属性装饰器</h2>
+        <p>直接暴露属性会破坏封装，而 <code class="inline">get_xxx()</code> / <code class="inline">set_xxx()</code> 又过于繁琐。<code class="inline">@property</code> 让你像访问普通属性一样读写，背后却可以嵌入校验逻辑，是 Python 推荐的封装方式。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">class Celsius:
+    def __init__(self, temperature=0):
+        self._temperature = temperature
+
+    @property
+    def temperature(self):
+        return self._temperature
+
+    @temperature.setter
+    def temperature(self, value):
+        if value < -273.15:
+            raise ValueError("温度不能低于绝对零度")
+        self._temperature = value
+
+c = Celsius(25)
+print(c.temperature)    # 25 —— 像读属性一样，实际调用 getter
+c.temperature = 30      # 像赋值一样，实际调用 setter
+# c.temperature = -300  # ValueError: 温度不能低于绝对零度
+</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：getter / setter</div>
+          <p>Python 的 <code class="inline">@property</code> + <code class="inline">@x.setter</code> 与 JS/TS 类的 <code class="inline">get</code> / <code class="inline">set</code> 语法几乎一一对应：都用「像属性一样访问」的写法，背后跑自定义逻辑。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">class Celsius {
+  constructor(temperature = 0) {
+    this._temperature = temperature;
+  }
+  // 只读 getter / 可写 setter，等价于 Python 的 @property
+  get temperature() {
+    return this._temperature;
+  }
+  set temperature(value) {
+    if (value < -273.15) throw new Error("温度不能低于绝对零度");
+    this._temperature = value;
+  }
+}
+const c = new Celsius(25);
+console.log(c.temperature);  // 25
+c.temperature = 30;          // 调用 setter
+</code></pre>
+          </div>
+        </div>
+
+        <!-- MixIn -->
+        <h2 data-section="mixin">多重继承与 MixIn</h2>
+        <p>Python 支持多重继承，但随意继承多个"类"容易混乱。常见的设计模式是 <strong>MixIn</strong>：把某个可复用能力单独写成一个类，名字通常以 <code class="inline">Mixin</code> 结尾，再通过多重继承"混入"到主类中，实现能力的灵活组合。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">class Animal:
+    def eat(self):
+        return "吃东西"
+
+class FlyMixin:
+    def fly(self):
+        return "我会飞"
+
+class SwimMixin:
+    def swim(self):
+        return "我会游泳"
+
+# 通过多重继承组合多种能力
+class Duck(Animal, FlyMixin, SwimMixin):
+    pass
+
+d = Duck()
+print(d.eat(), d.fly(), d.swim())   # 吃东西 我会飞 我会游泳
+</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：混入与接口</div>
+          <p>Python 的 MixIn 对应 JS 的「混入（mixin）」模式——把能力对象合并进原型；也对应 TS 的接口（interface）组合多个能力约束。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// 用 Object.assign 组合多个能力（MixIn 模式）
+const FlyMixin = {
+  fly() { return "我会飞"; }
+};
+const SwimMixin = {
+  swim() { return "我会游泳"; }
+};
+
+class Duck {}
+Object.assign(Duck.prototype, FlyMixin, SwimMixin);
+
+const d = new Duck();
+console.log(d.fly(), d.swim());
+
+// TypeScript 中接口可"组合"多个能力
+// interface Flyable { fly(): void; }
+// interface Swimmable { swim(): void; }
+// class Duck implements Flyable, Swimmable {}
+</code></pre>
+          </div>
+        </div>
+
+        <!-- 定制类 -->
+        <h2 data-section="dunder">定制类：特殊方法</h2>
+        <p>Python 中形如 <code class="inline">__xxx__</code> 的特殊方法（dunder method）能让你的类表现得更像内建类型。实现它们，类就能支持打印、迭代、下标访问、调用、长度等直观操作。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">class Vector:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __str__(self):            # print() 时调用
+        return f"Vector({self.x}, {self.y})"
+
+    def __repr__(self):           # 调试/交互环境展示
+        return f"Vector(x={self.x}, y={self.y})"
+
+    def __add__(self, other):     # 支持 + 运算
+        return Vector(self.x + other.x, self.y + other.y)
+
+    def __getitem__(self, index): # 支持下标访问 v[0]
+        return (self.x, self.y)[index]
+
+    def __len__(self):            # 支持 len(v)
+        return 2
+
+    def __call__(self):           # 支持把实例当函数调用 v()
+        return self.x ** 2 + self.y ** 2
+
+    def __iter__(self):           # 支持 for 循环
+        yield self.x
+        yield self.y
+
+v = Vector(2, 3)
+print(v)              # Vector(2, 3)
+print(v[0])           # 2
+print(len(v))         # 2
+print(v())            # 13
+print(list(v))        # [2, 3]
+</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：Symbol 特殊方法</div>
+          <p>JS 用 <code class="inline">Symbol.toStringTag</code> 控制 <code class="inline">Object.prototype.toString</code> 的标签，用 <code class="inline">Symbol.iterator</code> 定义迭代行为——分别对应 Python 的 <code class="inline">__str__</code> 与 <code class="inline">__iter__</code> 等钩子。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">class Vector {
+  constructor(x, y) { this.x = x; this.y = y; }
+  // 等价于 Python 的 __str__ / __repr__
+  get [Symbol.toStringTag]() { return `Vector(${this.x}, ${this.y})`; }
+  // 等价于 Python 的 __iter__
+  *[Symbol.iterator]() {
+    yield this.x;
+    yield this.y;
+  }
+}
+const v = new Vector(2, 3);
+console.log([...v]);  // [2, 3]
+</code></pre>
+          </div>
+        </div>
+
+        <!-- 枚举类 -->
+        <h2 data-section="enum">枚举类</h2>
+        <p>用整数或字符串裸常量表示状态容易出错（例如 1 究竟代表什么？）。<code class="inline">enum.Enum</code> 提供有名字、可比较、不可随意赋值的枚举类型，让代码更安全、可读性更高。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">from enum import Enum, auto
+
+class Color(Enum):
+    RED = 1
+    GREEN = 2
+    BLUE = 3
+
+print(Color.RED)          # Color.RED
+print(Color.RED.value)    # 1
+print(Color(2))           # Color.GREEN —— 通过值反向查找
+
+# auto() 自动分配递增值，省去手写
+class Status(Enum):
+    PENDING = auto()
+    RUNNING = auto()
+    DONE = auto()
+
+print(Status.PENDING.name)  # PENDING
+</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：TypeScript 枚举</div>
+          <p>Python 的 <code class="inline">enum.Enum</code> 与 TypeScript 的 <code class="inline">enum</code> 目的一致：把一组相关常量组织成名副其实的命名成员，避免魔法数字。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS 没有原生 enum，常用对象模拟；TS 才有原生 enum
+const Color = {
+  RED: "red",
+  GREEN: "green",
+  BLUE: "blue",
+};
+// TypeScript 写法（对应 Python enum.Enum）：
+// enum Color { Red, Green, Blue }
+// enum Status { Pending = "pending", Running = "running" }
+console.log(Color.RED);  // "red"
+</code></pre>
+          </div>
+        </div>
+
+        <!-- 元类 -->
+        <h2 data-section="metaclass">元类简介</h2>
+        <p>在 Python 中，「类也是对象」，而创建类的「类」叫元类（metaclass），默认是 <code class="inline">type</code>。通过自定义元类，你可以在类被创建时修改它的定义（如统一改名、自动注册）。<strong>日常开发很少需要，了解其存在即可。</strong></p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python"># 元类控制"类的创建"，了解概念即可
+class UpperAttrMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        uppercase_attrs = {
+            key.upper(): value
+            for key, value in attrs.items()
+            if not key.startswith("__")
+        }
+        return super().__new__(cls, name, bases, uppercase_attrs)
+
+class Config(metaclass=UpperAttrMetaclass):
+    debug = True
+    host = "localhost"
+
+print(Config.DEBUG)    # True —— 属性名被元类转为大写
+print(Config.HOST)     # 'localhost'
+</code></pre>
+        </div>
+
+        <!-- Exercise -->
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>用 @property 做温度转换</strong> — 定义 <code class="inline">Temperature</code> 类，内部存摄氏度，提供 <code class="inline">celsius</code> 与 <code class="inline">fahrenheit</code> 两个属性（华氏 = 摄氏 × 9/5 + 32），并加上越界校验。</li>
+            <li><strong>定义颜色枚举</strong> — 用 <code class="inline">enum.Enum</code> 定义一组颜色，再写一个函数根据枚举值返回对应的中文名称。</li>
+            <li><strong>可迭代向量类</strong> — 实现 <code class="inline">Vector</code>，支持 <code class="inline">+</code> 相加、<code class="inline">[]</code> 下标访问、<code class="inline">len()</code> 与 <code class="inline">for</code> 遍历，让它用起来像内建序列。</li>
+            <li><strong>__slots__ 优化</strong> — 对比一个有 <code class="inline">__slots__</code> 和一个没有的同类，分别创建十万实例，观察 <code class="inline">__dict__</code> 是否存在以及内存差异。</li>
+          </ol>
+        </div>
+
+        <!-- Chapter Navigation -->
+        <div class="chapter-nav">
+          <a href="../tutorials.html">
+            <span class="nav-label">← 返回目录</span>
+            <span class="nav-title">教程目录</span>
+          </a>
+          <a href="exceptions.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第十一章：异常处理</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3>
+        <p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p>
+      </div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p>
+      <p>Built with HTML, CSS &amp; JavaScript · 内容参考廖雪峰 Python 教程体系</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

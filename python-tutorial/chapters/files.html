@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十三章：文件与IO编程 — Python 学习教程</title>
+  <meta name="description" content="Python文件操作教程，学习文件读写、上下文管理器、pathlib、CSV和JSON处理。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo"><span>Python</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#readwrite" class="active">文件读写</a></li>
+          <li><a href="#with">上下文管理器</a></li>
+          <li><a href="#pathlib">pathlib</a></li>
+          <li><a href="#json">JSON 处理</a></li>
+          <li><a href="#csv">CSV 处理</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a><span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a><span class="separator">/</span>
+          <span>文件操作</span>
+        </div>
+
+        <h1>第十三章：文件与IO编程</h1>
+        <div class="chapter-meta">
+          <span>难度：进阶</span>
+          <span>预计学习时间：1 周</span>
+          <span>前置知识：函数、数据类型</span>
+        </div>
+
+        <p>文件操作是实际编程中最常见的任务之一。无论是读取配置文件、处理数据还是写入日志，都需要掌握文件的读写技巧。本章将介绍 Python 文件操作的完整体系。</p>
+
+        <h2 data-section="readwrite" id="readwrite">文件读写基础</h2>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 写入文件
+f = open("example.txt", "w", encoding="utf-8")
+f.write("Hello, Python!\n")
+f.write("第二行内容\n")
+f.close()  # 必须手动关闭！
+
+# 读取文件
+f = open("example.txt", "r", encoding="utf-8")
+content = f.read()  # 读取全部内容
+print(content)
+f.close()
+
+# 文件打开模式
+# "r"  — 只读 (默认)
+# "w"  — 只写 (覆盖已有内容)
+# "a"  — 追加 (在末尾添加)
+# "r+" — 读写
+# "b"  — 二进制模式 (如 "rb", "wb")
+
+# 逐行读取
+f = open("example.txt", "r", encoding="utf-8")
+for line in f:
+    print(line.strip())  # strip() 去除行尾换行符
+f.close()
+
+# readlines — 读取所有行到列表
+f = open("example.txt", "r", encoding="utf-8")
+lines = f.readlines()
+f.close()
+print(lines)  # ['Hello, Python!\n', '第二行内容\n']</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>永远指定 <code class="inline">encoding="utf-8"</code>。不指定编码在不同操作系统上可能产生不同的结果，导致乱码问题。</p>
+        </div>
+
+        <h2 data-section="with" id="with">上下文管理器 (with 语句)</h2>
+        <p><code class="inline">with</code> 语句会在代码块执行完毕后自动关闭文件，即使发生异常也会正确关闭。这是推荐的文件操作方式。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 推荐方式 — 使用 with 语句
+with open("example.txt", "w", encoding="utf-8") as f:
+    f.write("使用 with 语句\n")
+    f.write("自动关闭，无需手动 close\n")
+# 离开 with 块后，文件已自动关闭
+
+# 读取也一样
+with open("example.txt", "r", encoding="utf-8") as f:
+    for line in f:
+        print(line.strip())
+
+# 同时打开多个文件
+with open("input.txt", "r") as fin, open("output.txt", "w") as fout:
+    for line in fin:
+        fout.write(line.upper())
+
+# 自定义上下文管理器
+class Timer:
+    def __enter__(self):
+        import time
+        self.start = time.time()
+        return self
+    
+    def __exit__(self, *args):
+        import time
+        self.elapsed = time.time() - self.start
+        print(f"耗时: {self.elapsed:.3f}s")
+
+with Timer():
+    sum(range(1000000))  # 耗时: 0.023s</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：文件操作对比</div>
+          <p>Python 的 <code class="inline">with</code> 对应 Node.js 的 async/await + try/finally 模式（或使用库如 <code class="inline">fs/promises</code>）。Node.js 中没有内置的上下文管理器语法糖，需要手动管理资源清理。<code class="inline">pathlib</code> 在 JS/TS 中对应 <code class="path</code> 模块或第三方库如 <code class="inline">path-browserify</code>。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// Node.js 文件读写 (类似 Python with open)
+import { readFile, writeFile } from 'fs/promises';
+
+async function readFileSafe(filePath) {
+  try {
+    const content = await readFile(filePath, 'utf8');
+    console.log(content);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      console.log('文件不存在');  // 类似 FileNotFoundError
+    }
+  } finally {
+    console.log('清理完成');  // 类似 finally
+  }
+}
+
+// JSON 操作 (几乎完全一致)
+const data = JSON.parse(jsonStr);     // json.loads()
+const str = JSON.stringify(data);   // json.dumps()
+await writeFile('data.json', JSON.stringify(data)); // json.dump()
+
+// 路径操作 (path 模块)
+import * as path from 'path';
+console.log(path.basename('/a/b/c.txt'));  // c.txt (类似 Path.name)
+console.log(path.extname('file.txt'));  // .txt (类似 Path.suffix)
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="pathlib" id="pathlib">pathlib — 现代路径操作</h2>
+        <p><code class="inline">pathlib</code> 是 Python 3.4+ 引入的面向对象路径操作库，比 <code class="inline">os.path</code> 更优雅。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">from pathlib import Path
+
+# 创建路径对象
+p = Path(".")                    # 当前目录
+p = Path("data") / "file.txt"    # 路径拼接 (用 / 操作符)
+p = Path.home()                # 用户主目录
+
+# 路径属性
+p = Path("/Users/alice/data/file.txt")
+print(p.name)        # file.txt — 文件名
+print(p.stem)        # file — 不含扩展名
+print(p.suffix)      # .txt — 扩展名
+print(p.parent)      # /Users/alice/data — 父目录
+print(p.parts)       # ('/', 'Users', 'alice', 'data', 'file.txt')
+
+# 路径操作
+p = Path("data") / "file.txt"
+print(p.exists())        # 是否存在
+print(p.is_file())        # 是否是文件
+print(p.is_dir())         # 是否是目录
+
+# 创建目录
+Path("new_dir").mkdir(exist_ok=True)
+
+# 遍历目录
+for f in Path(".").iterdir():
+    print(f)
+
+# 递归查找 — glob
+for f in Path(".").rglob("*.py"):
+    print(f)  # 所有 .py 文件
+
+# pathlib 读写文件 — 一行搞定
+p = Path("data.txt")
+p.write_text("Hello!", encoding="utf-8")
+content = p.read_text(encoding="utf-8")</code></pre>
+        </div>
+
+        <h2 data-section="json" id="json">JSON 处理</h2>
+        <p>JSON 是现代应用中最常用的数据交换格式，Python 的 <code class="inline">json</code> 模块让 JSON 处理变得简单。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">import json
+
+# Python 对象 → JSON 字符串
+data = {
+    "name": "Alice",
+    "age": 25,
+    "hobbies": ["reading", "coding"],
+    "active": True,
+    "score": None
+}
+
+json_str = json.dumps(data, indent=2, ensure_ascii=False)
+print(json_str)
+
+# JSON 字符串 → Python 对象
+parsed = json.loads(json_str)
+print(parsed["name"])        # Alice
+print(type(parsed["hobbies"])) # &lt;class 'list'&gt;
+
+# 写入 JSON 文件
+with open("data.json", "w", encoding="utf-8") as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
+
+# 读取 JSON 文件
+with open("data.json", "r", encoding="utf-8") as f:
+    loaded = json.load(f)
+    print(loaded["hobbies"])  # ['reading', 'coding']
+
+# 类型映射关系
+# Python dict  → JSON object {}
+# Python list  → JSON array []
+# Python str   → JSON string
+# Python int/float → JSON number
+# Python True/False → JSON true/false
+# Python None  → JSON null</code></pre>
+        </div>
+
+        <h2 data-section="csv" id="csv">CSV 处理</h2>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">import csv
+
+# 写入 CSV
+rows = [
+    ["姓名", "年龄", "城市"],
+    ["Alice", 25, "上海"],
+    ["Bob", 30, "北京"],
+    ["Carol", 28, "深圳"],
+]
+
+with open("users.csv", "w", encoding="utf-8-sig", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerows(rows)
+
+# 读取 CSV
+with open("users.csv", "r", encoding="utf-8-sig") as f:
+    reader = csv.reader(f)
+    for row in reader:
+        print(row)
+
+# 使用 DictReader — 更直观
+with open("users.csv", "r", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        print(f"{row['姓名']}, {row['年龄']}岁, {row['城市']}")</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>处理含中文的 CSV 文件时，写入用 <code class="inline">utf-8-sig</code>（带 BOM），读取也用 <code class="inline">utf-8-sig</code>，这样 Excel 打开不会乱码。同时记得加 <code class="inline">newline=""</code> 参数。</p>
+        </div>
+
+        <h2 data-section="stringio">StringIO 与 BytesIO</h2>
+        <p>有时你只是想在内存里临时读写字符串或字节，而不想真的落盘成文件。<code class="inline">io.StringIO</code> 提供类文件对象的字符串缓冲，<code class="inline">io.BytesIO</code> 则处理二进制数据，二者都支持 <code class="inline">read</code>/<code class="inline">write</code>/<code class="inline">seek</code> 等文件接口，常用于测试或管道处理。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">import io
+
+# 在内存中读写字符串
+buffer = io.StringIO()
+buffer.write("Hello\n")
+buffer.write("World\n")
+print(buffer.getvalue())   # Hello\nWorld\n
+
+# 回到开头读回内容
+buffer.seek(0)
+for line in buffer:
+    print(line.strip())
+
+# BytesIO — 处理二进制数据
+bio = io.BytesIO()
+bio.write(b"binary data")
+print(bio.getvalue())      # b'binary data'
+
+buffer.close()
+bio.close()</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比</div>
+          <p>JS 没有与 <code class="inline">StringIO</code>/<code class="inline">BytesIO</code> 直接对应的内置类，但可以用数组/字符串拼接近似字符串缓冲，用 <code class="inline">Blob</code> 或 <code class="inline">Uint8Array</code> 近似字节缓冲。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// JS 近似：用数组拼接字符串，类似 StringIO.getvalue()
+const parts = [];
+parts.push("Hello\n");
+parts.push("World\n");
+const text = parts.join("");
+console.log(text);
+
+// 二进制可用 Blob
+const blob = new Blob([new Uint8Array([98, 105, 110])]);</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="pickle">序列化 pickle</h2>
+        <p><code class="inline">pickle</code> 能把任意 Python 对象（含自定义类实例）序列化到字节流，再反序列化还原。<code class="inline">pickle.dump</code>/<code class="inline">pickle.load</code> 对应写入/读取。它与 <code class="inline">json</code> 最大的区别是：pickle 仅限 Python、输出二进制、且<strong>绝不反序列化不可信数据</strong>（可执行任意代码）；json 才是跨语言、文本、安全的数据交换格式。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">import pickle
+
+data = {"name": "Alice", "scores": [90, 85, 88]}
+
+# 序列化到文件（二进制模式 "wb"）
+with open("data.pkl", "wb") as f:
+    pickle.dump(data, f)
+
+# 反序列化
+with open("data.pkl", "rb") as f:
+    loaded = pickle.load(f)
+print(loaded)   # {'name': 'Alice', 'scores': [90, 85, 88]}
+
+# 与 json 对比：json 文本、跨语言、安全
+import json
+with open("data.json", "w", encoding="utf-8") as f:
+    json.dump(data, f)</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">安全警告</div>
+          <p>切勿用 <code class="inline">pickle.load</code> 加载来源不可信的数据。pickle 在反序列化时会构造对象，攻击者可借此执行任意代码。跨进程/跨网络传输数据时请优先使用 <code class="inline">json</code>。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比</div>
+          <p>JS 没有原生的 pickle，常用 <code class="inline">JSON.stringify</code>/<code class="inline">JSON.parse</code> 做文本序列化；若只是想在内存里深拷贝（而非落盘），可用 <code class="inline">structuredClone</code>。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// JS 用 JSON 序列化（类似 pickle.dump / load）
+const data = { name: "Alice", scores: [90, 85, 88] };
+const str = JSON.stringify(data);    // 类似 pickle.dump
+const back = JSON.parse(str);        // 类似 pickle.load
+
+// 仅内存深拷贝（非持久化）
+const clone = structuredClone(data);</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="os-path">os 与路径操作</h2>
+        <p><code class="inline">os</code> 模块提供与操作系统交互的基础能力：列出目录、创建多级目录、拼接路径等。其中 <code class="inline">os.path</code> 是传统的路径工具函数集合；更现代的面向对象方案是 <code class="inline">pathlib</code>（见上方「pathlib」小节），日常新代码推荐优先用 <code class="inline">pathlib</code>。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">import os
+
+# 列出目录内容
+print(os.listdir("."))
+
+# 创建多级目录
+os.makedirs("a/b/c", exist_ok=True)
+
+# os.path 基础工具
+path = "/Users/alice/data/file.txt"
+print(os.path.basename(path))        # file.txt
+print(os.path.dirname(path))         # /Users/alice/data
+print(os.path.splitext(path))        # ('/Users/alice/data/file', '.txt')
+print(os.path.join("a", "b", "c"))   # a/b/c (跨平台正确分隔符)
+
+# 与 pathlib 对比（更面向对象、可读性更好）
+from pathlib import Path
+p = Path(path)
+print(p.name, p.suffix)              # file.txt .txt</code></pre>
+        </div>
+
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>日志分析器</strong> — 读取一个日志文件，统计不同错误类型的出现次数，将结果写入 JSON 文件。</li>
+            <li><strong>通讯录管理</strong> — 实现一个通讯录程序，数据存储在 JSON 文件中，支持增删改查。</li>
+            <li><strong>CSV 数据处理</strong> — 读取 CSV 格式的学生成绩表，计算每个学生的平均分，输出排名到新 CSV 文件。</li>
+            <li><strong>文件搜索器</strong> — 使用 pathlib 递归搜索指定目录下的文件，按文件类型分类统计。</li>
+          </ol>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="testing.html">
+            <span class="nav-label">← 上一章</span>
+            <span class="nav-title">第十二章：调试与测试</span>
+          </a>
+          <a href="regex.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第十四章：正则表达式</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand"><h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3><p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p></div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p><p>Built with HTML, CSS &amp; JavaScript · 内容参考廖雪峰 Python 教程体系</p></div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

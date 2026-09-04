@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二十章：数据库与 ORM — Python 学习教程</title>
+  <meta name="description" content="Python 数据库与 ORM 教程：用 SQLAlchemy 连接数据库、设计模型、增删改查、迁移管理，含完整项目案例与示意图。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo"><span>Python</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#why" class="active">为什么需要数据库</a></li>
+          <li><a href="#sqlalchemy">SQLAlchemy 与 ORM</a></li>
+          <li><a href="#model">模型设计</a></li>
+          <li><a href="#crud">增删改查 (CRUD)</a></li>
+          <li><a href="#relation">关系与查询</a></li>
+          <li><a href="#migration">数据库迁移</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a><span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a><span class="separator">/</span>
+          <span>数据库与 ORM</span>
+        </div>
+
+        <h1>第二十章：数据库与 ORM</h1>
+        <div class="chapter-meta">
+          <span>难度：进阶</span>
+          <span>预计学习时间：1-2 周</span>
+          <span>前置知识：面向对象、Web 开发实战</span>
+        </div>
+
+        <p>上一章的待办清单用内存列表存数据——程序一关数据就没了，更无法多人共享。真实应用必须用<strong>数据库</strong>持久化数据。本章带你用 Python 生态最流行的 <strong>SQLAlchemy</strong> ORM，把上一章的待办网站升级为"数据不丢失"的真实应用，理解模型设计、CRUD、关系与迁移。</p>
+
+        <div class="path-hint">
+          <span class="path-chip">理解持久化与 ORM</span>
+          <span class="path-chip">用 SQLAlchemy 定义模型</span>
+          <span class="path-chip">掌握 CRUD 与查询</span>
+          <span class="path-chip">用迁移管理表结构</span>
+        </div>
+
+        <h2 data-section="why" id="why">为什么需要数据库</h2>
+        <p>变量存在内存里，进程结束即消失；文件能存盘但查询低效、并发难控。<strong>数据库</strong>把数据组织成"表（行×列）"，提供高效查询、事务、并发控制与持久化。关系型数据库（MySQL、PostgreSQL、SQLite）用 SQL 操作；非关系型（MongoDB、Redis）各有侧重。学习阶段用<strong> SQLite</strong> 最方便——单文件、零配置，Python 标准库自带。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 标准库直接操作 SQLite（了解原理即可，实际项目用 ORM）
+import sqlite3
+conn = sqlite3.connect("todo.db")
+cur = conn.cursor()
+cur.execute("CREATE TABLE IF NOT EXISTS todo (id INTEGER PRIMARY KEY, task TEXT, done INTEGER)")
+cur.execute("INSERT INTO todo (task, done) VALUES (?, ?)", ("学 Flask", 0))   # 参数化防注入
+conn.commit()
+for row in cur.execute("SELECT * FROM todo"):
+    print(row)
+conn.close()</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>拼 SQL 字符串极易遭 <strong>SQL 注入</strong>攻击：<code class="inline">f"... WHERE name='{name}'"</code> 若 name 是 <code class="inline">' OR '1'='1</code> 就会泄露全表。务必用<strong>参数化查询</strong>（<code class="inline">?</code> 占位符或 ORM），把用户输入当数据而非代码。</p>
+        </div>
+
+        <h2 data-section="sqlalchemy" id="sqlalchemy">SQLAlchemy 与 ORM</h2>
+        <p>直接写 SQL 字符串难以维护、易出错、与面向对象代码脱节。<strong>ORM</strong>（Object-Relational Mapping）把数据库表映射成 Python 类、行映射成对象，让你用 <code class="inline">Todo.query.all()</code> 代替 <code class="inline">SELECT * FROM todo</code>。SQLAlchemy 是 Python 最强大的 ORM，既支持高层 ORM 也支持底层 SQL 表达式。</p>
+
+        <div class="figure">
+          <svg viewBox="0 0 580 160" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <defs>
+              <marker id="arDb" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#3776AB"/></marker>
+            </defs>
+            <rect x="20" y="45" width="150" height="70" rx="6" fill="#eef6ff" stroke="#3776AB" stroke-width="2"/>
+            <text x="95" y="70" text-anchor="middle" font-size="13" fill="#2c3e50">Python 类</text>
+            <text x="95" y="90" text-anchor="middle" font-size="11" fill="#6c7a89">class Todo</text>
+            <text x="95" y="106" text-anchor="middle" font-size="11" fill="#6c7a89">id / task / done</text>
+            <line x1="170" y1="80" x2="260" y2="80" stroke="#3776AB" stroke-width="2" marker-end="url(#arDb)"/>
+            <text x="215" y="72" text-anchor="middle" font-size="11" fill="#3776AB">ORM 映射</text>
+            <rect x="260" y="45" width="150" height="70" rx="6" fill="#fff" stroke="#3776AB" stroke-width="2"/>
+            <text x="335" y="70" text-anchor="middle" font-size="13" fill="#2c3e50">数据库表</text>
+            <text x="335" y="90" text-anchor="middle" font-size="11" fill="#6c7a89">TABLE todo</text>
+            <text x="335" y="106" text-anchor="middle" font-size="11" fill="#6c7a89">id / task / done</text>
+            <line x1="410" y1="80" x2="500" y2="80" stroke="#27ae60" stroke-width="2" marker-end="url(#arDb)"/>
+            <rect x="500" y="55" width="60" height="50" rx="6" fill="#eafaf0" stroke="#27ae60" stroke-width="2"/>
+            <text x="530" y="85" text-anchor="middle" font-size="11" fill="#2c3e50">SQLite</text>
+            <text x="335" y="140" text-anchor="middle" font-size="12" fill="#6c7a89">对象 ←映射→ 表行；ORM 自动翻译 Python 操作为 SQL</text>
+          </svg>
+          <p class="figure-caption">示意图：ORM 映射关系 —— Python 的 <code class="inline">Todo</code> 类对应数据库 <code class="inline">todo</code> 表，类的每个实例对应一行记录，属性对应列。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：ORM 与数据层</div>
+          <p>后端 ORM 类似前端的"数据访问层"：把存储细节封装起来，业务代码只面对对象。Node 生态的 <strong>Prisma/TypeORM/Sequelize</strong> 与 SQLAlchemy 同理——定义 schema、生成模型、用对象方法操作数据，框架自动生成 SQL。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// Prisma（Node ORM）写法，与 SQLAlchemy 思路一致
+const todos = await prisma.todo.findMany({ where: { done: false } });
+await prisma.todo.create({ data: { task: "学 ORM", done: false } });
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="model" id="model">模型设计</h2>
+        <p>用 SQLAlchemy 定义模型，就是把"表结构"写成 Python 类。每个类属性 = 一个列，类型用 <code class="inline">Column</code> 声明。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-bash">pip install flask-sqlalchemy   # Flask 集成 SQLAlchemy 的封装</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+# SQLite 文件，数据持久化到 todo.db
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///todo.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db = SQLAlchemy(app)
+
+# 定义模型 = 定义表
+class Todo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)       # 主键
+    task = db.Column(db.String(120), nullable=False)    # 非空字符串
+    done = db.Column(db.Boolean, default=False)         # 默认 False
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    def to_dict(self):
+        return {"id": self.id, "task": self.task, "done": self.done}
+
+# 首次运行时创建表
+with app.app_context():
+    db.create_all()</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p><code class="inline">db.create_all()</code> 只在表不存在时创建，不会更新已存在表的结构。表结构变更要用<strong>迁移工具</strong>（如 Alembic/Flask-Migrate），见本章末尾。</p>
+        </div>
+
+        <h2 data-section="crud" id="crud">增删改查 (CRUD)</h2>
+        <p>CRUD 是数据操作的四大基本动作：Create 增、Read 查、Update 改、Delete 删。ORM 把它们变成直观的对象方法。</p>
+
+        <h3>从零掌握 CRUD：4 个步骤</h3>
+        <ul class="steps">
+          <li class="step-item">
+            <h4>创建（Create）</h4>
+            <p>new = Todo(task="学 ORM") → <code class="inline">db.session.add(new)</code> → <code class="inline">db.session.commit()</code>。记得提交，否则不落库。</p>
+          </li>
+          <li class="step-item">
+            <h4>查询（Read）</h4>
+            <p><code class="inline">Todo.query.all()</code> 全部、<code class="inline">.get(id)</code> 按主键、<code class="inline">.filter_by(done=False).all()</code> 条件查询。</p>
+          </li>
+          <li class="step-item">
+            <h4>更新（Update）</h4>
+            <p>取出对象 → 改属性 → <code class="inline">commit()</code>。ORM 会自动生成 UPDATE 语句。</p>
+          </li>
+          <li class="step-item">
+            <h4>删除（Delete）</h4>
+            <p><code class="inline">db.session.delete(obj)</code> → <code class="inline">commit()</code>。删除前先确认对象存在。</p>
+          </li>
+        </ul>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">from app import app, db, Todo
+
+with app.app_context():
+    # 增
+    t = Todo(task="完成数据库章节")
+    db.session.add(t)
+    db.session.commit()
+    print("新增 id:", t.id)
+
+    # 查
+    all_todos = Todo.query.all()
+    undone = Todo.query.filter_by(done=False).all()
+    first = Todo.query.get(1)
+
+    # 改
+    first.done = True
+    db.session.commit()
+
+    # 删
+    db.session.delete(first)
+    db.session.commit()</code></pre>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">项目案例：用数据库升级待办网站</div>
+          <p>把上一章的内存列表换成 SQLAlchemy，数据即可持久化、重启不丢：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">@app.route("/add", methods=["POST"])
+def add():
+    task = request.form.get("task", "").strip()
+    if task:
+        db.session.add(Todo(task=task))
+        db.session.commit()
+    return redirect(url_for("index"))
+
+@app.route("/done/&lt;int:todo_id&gt;")
+def done(todo_id):
+    t = Todo.query.get_or_404(todo_id)   # 不存在返回 404
+    t.done = not t.done
+    db.session.commit()
+    return redirect(url_for("index"))</code></pre>
+          </div>
+          <p><code class="inline">get_or_404</code> 是 Flask-SQLAlchemy 的便捷方法：找不到记录时直接返回 404 页面，避免手动判空。</p>
+        </div>
+
+        <h2 data-section="relation" id="relation">关系与查询</h2>
+        <p>真实数据往往有关联：一个用户有多条待办、一篇文章有多个评论。SQLAlchemy 用 <code class="inline">relationship</code> + 外键表达一对多关系，让你能 <code class="inline">user.todos</code> 直接拿到关联数据。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    todos = db.relationship("Todo", backref="user", lazy=True)
+
+class Todo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task = db.Column(db.String(120), nullable=False)
+    done = db.Column(db.Boolean, default=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))   # 外键
+
+# 使用
+u = User(name="alice")
+db.session.add(u); db.session.commit()
+db.session.add(Todo(task="买牛奶", user_id=u.id)); db.session.commit()
+
+print(u.todos)            # [Todo 1] — 直接拿到该用户所有待办
+print(u.todos[0].user)    # 反向也能拿到所属用户 (backref)</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p><code class="inline">lazy=True</code> 表示访问 <code class="inline">user.todos</code> 时才发 SQL 查询（懒加载）。若要一次性取出关联数据避免 N+1 查询问题，可用 <code class="inline">joinedload</code> 或 <code class="inline">lazy="joined"</code>。</p>
+        </div>
+
+        <h2 data-section="migration" id="migration">数据库迁移</h2>
+        <p>项目演进中表结构会变（加列、改类型）。直接改模型后 <code class="inline">create_all</code> 不会更新已存在表。<strong>迁移工具</strong>能记录每次结构变更，并能在不同环境间同步、回滚。Flask 生态用 <strong>Flask-Migrate</strong>（基于 Alembic）。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-bash">pip install flask-migrate
+
+# 在 app.py 里：
+# from flask_migrate import Migrate
+# Migrate(app, db)
+
+# 初始化迁移仓库（仅首次）
+flask db init
+
+# 每次改完模型后：
+flask db migrate -m "add created_at to todo"   # 生成迁移脚本
+flask db upgrade                                 # 应用到数据库
+flask db downgrade                               # 回滚上一步</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>迁移脚本提交进版本库，团队成员拉代码后执行 <code class="inline">flask db upgrade</code> 即可同步结构。生产环境迁移前务必备份并先在测试库演练，因为某些结构变更（如删列）会丢数据且不可逆。</p>
+        </div>
+
+        <div class="keypoints">
+          <div class="keypoints-label">本章核心要点</div>
+          <ul>
+            <li>数据库持久化数据；学习用 SQLite，生产用 MySQL/PostgreSQL。</li>
+            <li><strong>SQL 注入</strong>是头号威胁——永远用参数化或 ORM，禁止拼字符串。</li>
+            <li>ORM 把表映射成类、行映射成对象，SQLAlchemy 是 Python 主流。</li>
+            <li>CRUD 四动作：add+commit、query.filter、改属性+commit、delete+commit。</li>
+            <li>关系用 <code class="inline">relationship + ForeignKey</code>，注意 N+1 查询问题。</li>
+            <li>表结构变更用 Flask-Migrate 迁移，提交脚本团队同步。</li>
+          </ul>
+        </div>
+
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>持久化待办</strong> — 把上一章的待办网站改成 SQLAlchemy 存储，重启后数据仍在。</li>
+            <li><strong>多用户</strong> — 增加 User 模型与一对多关系，每个用户有自己的待办列表。</li>
+            <li><strong>查询练习</strong> — 写出"未完成且按创建时间倒序前 10 条"的查询。</li>
+            <li><strong>迁移演练</strong> — 给 Todo 加 <code class="inline">priority</code> 列，用 Flask-Migrate 生成并应用迁移。</li>
+          </ol>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="web-flask.html">
+            <span class="nav-label">← 上一章</span>
+            <span class="nav-title">第十九章：Web 开发实战</span>
+          </a>
+          <a href="auth-security.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第二十一章：认证与安全</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand"><h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3><p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p></div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p><p>Built with HTML, CSS &amp; JavaScript</p></div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

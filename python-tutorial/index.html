@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Python 学习教程 — 从入门到精通</title>
+  <meta name="description" content="系统学习Python编程语言的完整教程，涵盖基础语法、数据类型、控制流、函数、面向对象、文件操作、异常处理等核心知识。">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <span>Python</span>
+      </a>
+      <button class="nav-toggle" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">首页</a></li>
+        <li><a href="tutorials.html">教程目录</a></li>
+        <li><a href="resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>系统学习 <span class="accent">Python</span> 编程</h1>
+        <p>从零基础到独立开发完整应用，覆盖变量、数据类型、控制流、函数、面向对象、模块管理、文件操作、异常处理及常用标准库。每章配套代码示例与练习项目。</p>
+        <div class="hero-buttons">
+          <a href="tutorials.html" class="btn btn-primary">开始学习</a>
+          <a href="chapters/basics.html" class="btn btn-outline">查看第一章</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="section">
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-number">24</div>
+          <div class="stat-label">核心章节</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">60+</div>
+          <div class="stat-label">代码示例</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">24</div>
+          <div class="stat-label">练习项目</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">免费开源</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section-alt">
+      <div class="section">
+        <div class="section-header">
+          <h2>为什么选择 Python？</h2>
+          <p>Python 是全球最流行的编程语言之一，以简洁优雅的语法和强大的生态系统著称。</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="icon">&lt;/&gt;</div>
+            <h3>简洁易读</h3>
+            <p>Python 的语法接近自然语言，代码可读性极高，是初学者入门编程的理想选择。强制缩进让代码风格天然统一。</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon accent">&#9881;</div>
+            <h3>全能型语言</h3>
+            <p>Web 开发、数据分析、人工智能、自动化脚本、科学计算 —— Python 几乎在所有领域都有成熟的应用方案。</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon">&#128230;</div>
+            <h3>丰富的生态</h3>
+            <p>PyPI 上有超过 50 万个第三方包，pip 一行命令即可安装。标准库本身也覆盖了大量常用功能。</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon accent">&#129309;</div>
+            <h3>活跃的社区</h3>
+            <p>全球数百万开发者的社区支持，遇到任何问题都能快速找到解决方案。Stack Overflow、GitHub 上资源丰富。</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon">&#128640;</div>
+            <h3>跨平台运行</h3>
+            <p>Windows、macOS、Linux 无缝运行同一份代码。一次编写，到处运行，无需修改。</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon accent">&#127919;</div>
+            <h3>面向未来</h3>
+            <p>AI 和数据科学的首选语言。TensorFlow、PyTorch、pandas 等核心库均以 Python 为主要接口。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Learning Path Preview -->
+    <section class="section">
+      <div class="section-header">
+        <h2>学习路径概览</h2>
+        <p>按照难度递进的 18 个章节，分为四个阶段，从环境搭建到异步 IO，稳步提升编程能力。</p>
+      </div>
+
+      <div class="course-group">
+        <h2 class="course-group-title">入门基础 <span class="group-count">第 1–4 章</span></h2>
+        <div class="chapter-grid">
+          <div class="chapter-card">
+            <span class="chapter-num">01</span>
+            <span class="difficulty beginner">入门</span>
+            <h3>环境搭建与第一个程序</h3>
+            <p>安装 Python、认识解释器，写出并运行你的第一个程序。</p>
+            <a href="chapters/env.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">02</span>
+            <span class="difficulty beginner">入门</span>
+            <h3>基础语法</h3>
+            <p>变量、运算符、字符串与字符编码 —— Python 编程的第一步。</p>
+            <a href="chapters/basics.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">03</span>
+            <span class="difficulty beginner">入门</span>
+            <h3>数据类型</h3>
+            <p>深入理解列表、字典、集合、bytes 等核心数据结构。</p>
+            <a href="chapters/datatypes.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">04</span>
+            <span class="difficulty beginner">入门</span>
+            <h3>控制流</h3>
+            <p>条件判断、循环、推导式、enumerate 与 match-case。</p>
+            <a href="chapters/controlflow.html" class="chapter-link">阅读章节 →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="course-group">
+        <h2 class="course-group-title">核心进阶 <span class="group-count">第 5–8 章</span></h2>
+        <div class="chapter-grid">
+          <div class="chapter-card">
+            <span class="chapter-num">05</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>函数</h3>
+            <p>参数传递、作用域、递归、闭包与装饰器的完整指南。</p>
+            <a href="chapters/functions.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">06</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>高级特性</h3>
+            <p>切片、迭代、生成器与迭代器，写出更 Pythonic 的代码。</p>
+            <a href="chapters/advanced.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">07</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>函数式编程</h3>
+            <p>高阶函数、lambda、装饰器进阶与偏函数。</p>
+            <a href="chapters/functional.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">08</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>模块与包管理</h3>
+            <p>模块、导入、包结构、pip 依赖与虚拟环境。</p>
+            <a href="chapters/modules.html" class="chapter-link">阅读章节 →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="course-group">
+        <h2 class="course-group-title">面向对象与工程 <span class="group-count">第 9–12 章</span></h2>
+        <div class="chapter-grid">
+          <div class="chapter-card">
+            <span class="chapter-num">09</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>面向对象编程</h3>
+            <p>类与对象、继承、多态、魔术方法与 __slots__。</p>
+            <a href="chapters/oop.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">10</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>面向对象高级编程</h3>
+            <p>@property、多重继承 MixIn、定制类与元类。</p>
+            <a href="chapters/oop-advanced.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">11</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>异常处理</h3>
+            <p>try/except 结构、自定义异常与调试技巧。</p>
+            <a href="chapters/exceptions.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">12</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>调试与测试</h3>
+            <p>断言、pdb 调试、unittest/pytest 与 doctest。</p>
+            <a href="chapters/testing.html" class="chapter-link">阅读章节 →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="course-group">
+        <h2 class="course-group-title">标准库与生态 <span class="group-count">第 13–24 章</span></h2>
+        <div class="chapter-grid">
+          <div class="chapter-card">
+            <span class="chapter-num">13</span>
+            <span class="difficulty intermediate">进阶</span>
+            <h3>文件与 IO 编程</h3>
+            <p>文件读写、StringIO、pickle 序列化与路径操作。</p>
+            <a href="chapters/files.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">14</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>正则表达式</h3>
+            <p>re 模块、匹配规则、分组替换与实战示例。</p>
+            <a href="chapters/regex.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">15</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>常用内置模块</h3>
+            <p>datetime、collections、itertools、hashlib 等。</p>
+            <a href="chapters/stdlib.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">16</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>进程与线程</h3>
+            <p>多进程、多线程与 GIL、ThreadLocal 与选型。</p>
+            <a href="chapters/concurrency.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">17</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>第三方库与虚拟环境</h3>
+            <p>requests、Pillow、psutil 等生态库与 venv。</p>
+            <a href="chapters/thirdparty.html" class="chapter-link">阅读章节 →</a>
+          </div>
+          <div class="chapter-card">
+            <span class="chapter-num">18</span>
+            <span class="difficulty advanced">高级</span>
+            <h3>异步 IO</h3>
+            <p>async/await、事件循环、任务与 aiohttp。</p>
+            <a href="chapters/asyncio.html" class="chapter-link">阅读章节 →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section-alt">
+      <div class="section" style="text-align: center;">
+        <div class="section-header">
+          <h2>准备好开始了吗？</h2>
+          <p>无需任何编程基础，跟随教程一步步掌握 Python 编程。</p>
+        </div>
+        <a href="chapters/basics.html" class="btn btn-learn" style="font-size: 1rem; padding: 14px 36px;">从第一章开始 →</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3>
+        <p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p>
+      </div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="chapters/env.html">环境搭建</a></li>
+          <li><a href="chapters/basics.html">基础语法</a></li>
+          <li><a href="chapters/datatypes.html">数据类型</a></li>
+          <li><a href="chapters/controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="chapters/functions.html">函数</a></li>
+          <li><a href="chapters/advanced.html">高级特性</a></li>
+          <li><a href="chapters/functional.html">函数式编程</a></li>
+          <li><a href="chapters/modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="chapters/oop.html">面向对象</a></li>
+          <li><a href="chapters/oop-advanced.html">OOP 高级</a></li>
+          <li><a href="chapters/exceptions.html">异常处理</a></li>
+          <li><a href="chapters/testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="chapters/files.html">文件与IO</a></li>
+          <li><a href="chapters/regex.html">正则表达式</a></li>
+          <li><a href="chapters/stdlib.html">常用内置模块</a></li>
+          <li><a href="chapters/concurrency.html">进程与线程</a></li>
+          <li><a href="chapters/thirdparty.html">第三方库</a></li>
+          <li><a href="chapters/asyncio.html">异步 IO</a></li>
+          <li><a href="resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="chapters/web-flask.html">Web 开发实战</a></li>
+          <li><a href="chapters/database.html">数据库与 ORM</a></li>
+          <li><a href="chapters/auth-security.html">认证与安全</a></li>
+          <li><a href="chapters/api-design.html">API 设计</a></li>
+          <li><a href="chapters/deploy.html">部署与 CI/CD</a></li>
+          <li><a href="chapters/perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p>
+      <p>Built with HTML, CSS &amp; JavaScript · 内容参考廖雪峰 Python 教程体系</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+
+  <script src="js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<svg width="640" height="480" viewBox="0 0 640 480" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Frontend developer blog illustration">
+  <defs>
+    <linearGradient id="g-brand" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#646cff"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+    <linearGradient id="g-surface" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a24"/>
+      <stop offset="100%" stop-color="#0f0f14"/>
+    </linearGradient>
+    <linearGradient id="g-glow-purple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#646cff" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="g-glow-pink" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ec4899" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="blur-soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+    <filter id="shadow-card" x="-20%" y="-10%" width="140%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="20" flood-color="#646cff" flood-opacity="0.18"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="120" cy="100" rx="100" ry="90" fill="url(#g-glow-purple)" filter="url(#blur-soft)"/>
+  <ellipse cx="520" cy="380" rx="110" ry="95" fill="url(#g-glow-pink)" filter="url(#blur-soft)"/>
+  <ellipse cx="480" cy="80" rx="70" ry="65" fill="#646cff" fill-opacity="0.12" filter="url(#blur-soft)"/>
+
+  <g filter="url(#shadow-card)">
+    <rect x="140" y="88" width="360" height="280" rx="20" fill="url(#g-surface)" stroke="url(#g-brand)" stroke-width="1.2" stroke-opacity="0.45"/>
+    <rect x="140" y="88" width="360" height="44" rx="20" fill="#22222e"/>
+    <circle cx="168" cy="110" r="6" fill="#ff5f57"/>
+    <circle cx="190" cy="110" r="6" fill="#febc2e"/>
+    <circle cx="212" cy="110" r="6" fill="#28c840"/>
+    <rect x="280" y="102" width="120" height="16" rx="8" fill="#2a2a38"/>
+    <rect x="168" y="156" width="140" height="10" rx="5" fill="#646cff" fill-opacity="0.85"/>
+    <rect x="168" y="182" width="220" height="8" rx="4" fill="#3f3f52"/>
+    <rect x="196" y="204" width="180" height="8" rx="4" fill="#a855f7" fill-opacity="0.7"/>
+    <rect x="196" y="226" width="240" height="8" rx="4" fill="#3f3f52"/>
+    <rect x="168" y="248" width="100" height="8" rx="4" fill="#ec4899" fill-opacity="0.75"/>
+    <rect x="168" y="270" width="260" height="8" rx="4" fill="#3f3f52"/>
+    <rect x="196" y="292" width="160" height="8" rx="4" fill="#646cff" fill-opacity="0.55"/>
+    <rect x="168" y="314" width="200" height="8" rx="4" fill="#3f3f52"/>
+    <text x="168" y="340" fill="url(#g-brand)" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="28" font-weight="700">&lt;/&gt;</text>
+  </g>
+
+  <g transform="translate(420 56)" filter="url(#shadow-card)">
+    <rect width="160" height="100" rx="14" fill="#16161f" stroke="#646cff" stroke-opacity="0.25" stroke-width="1"/>
+    <rect x="16" y="18" width="48" height="48" rx="10" fill="url(#g-brand)" fill-opacity="0.2"/>
+    <path d="M32 34 L40 42 L52 28" stroke="url(#g-brand)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <rect x="76" y="22" width="68" height="8" rx="4" fill="#4a4a5e"/>
+    <rect x="76" y="40" width="52" height="6" rx="3" fill="#3a3a4a"/>
+    <rect x="16" y="76" width="128" height="6" rx="3" fill="#646cff" fill-opacity="0.4"/>
+  </g>
+
+  <g transform="translate(72 300)">
+    <rect width="148" height="56" rx="28" fill="#16161f" stroke="url(#g-brand)" stroke-width="1" stroke-opacity="0.35"/>
+    <circle cx="36" cy="28" r="14" fill="url(#g-brand)" fill-opacity="0.25"/>
+    <text x="36" y="33" text-anchor="middle" fill="url(#g-brand)" font-family="system-ui, sans-serif" font-size="14" font-weight="700">JS</text>
+    <rect x="58" y="18" width="72" height="8" rx="4" fill="#646cff" fill-opacity="0.8"/>
+    <rect x="58" y="34" width="56" height="6" rx="3" fill="#4a4a5e"/>
+  </g>
+
+  <g fill="#646cff" fill-opacity="0.15">
+    <circle cx="560" cy="160" r="3"/><circle cx="580" cy="160" r="3"/><circle cx="600" cy="160" r="3"/>
+    <circle cx="560" cy="180" r="3"/><circle cx="580" cy="180" r="3"/><circle cx="600" cy="180" r="3"/>
+    <circle cx="560" cy="200" r="3"/><circle cx="580" cy="200" r="3"/><circle cx="600" cy="200" r="3"/>
+  </g>
+
+  <circle cx="320" cy="240" r="200" stroke="url(#g-brand)" stroke-width="1" stroke-opacity="0.12" fill="none" stroke-dasharray="8 12"/>
+</svg>

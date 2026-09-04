@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二十四章：性能优化与测试工程 — Python 学习教程</title>
+  <meta name="description" content="Python 性能优化与测试教程：pytest 单元测试、性能分析、缓存与异步任务、压测 locust，含项目案例与示意图。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo"><span>Python</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#pytest" class="active">pytest 单元测试</a></li>
+          <li><a href="#fixture">fixture 与 mock</a></li>
+          <li><a href="#profile">性能分析</a></li>
+          <li><a href="#cache">缓存与异步任务</a></li>
+          <li><a href="#load">压力测试</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a><span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a><span class="separator">/</span>
+          <span>性能与测试</span>
+        </div>
+
+        <h1>第二十四章：性能优化与测试工程</h1>
+        <div class="chapter-meta">
+          <span>难度：进阶</span>
+          <span>预计学习时间：1-2 周</span>
+          <span>前置知识：部署、API 设计</span>
+        </div>
+
+        <p>应用上线后，"<strong>快不快、稳不稳</strong>"决定了用户体验与留存。本章把测试与性能两件事讲透：用 <strong>pytest</strong> 写单元测试保证质量、用性能分析定位瓶颈、用缓存与异步任务提速、用 <strong>locust</strong> 压测验证承载能力。让"能跑"升级为"跑得快、跑得稳、改得安心"。</p>
+
+        <div class="path-hint">
+          <span class="path-chip">pytest 写测试</span>
+          <span class="path-chip">分析性能瓶颈</span>
+          <span class="path-chip">缓存 + 异步任务</span>
+          <span class="path-chip">压测验证承载</span>
+        </div>
+
+        <h2 data-section="pytest" id="pytest">pytest 单元测试</h2>
+        <p>测试是工程化的基石：它把"我改了代码会不会弄坏旧功能"变成自动可验证的事。<strong>pytest</strong> 是 Python 最流行的测试框架，写法简单（用 assert 即可）、发现测试自动、报告友好。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-bash">pip install pytest
+# 测试函数以 test_ 开头，文件以 test_ 开头
+pytest -v            # 详细模式
+pytest -k "discount" # 只跑名字含 discount 的测试</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># calc.py
+def discount(price, rate):
+    if not 0 &lt;= rate &lt;= 1:
+        raise ValueError("折扣率需在 0~1")
+    return round(price * (1 - rate), 2)
+
+# test_calc.py
+from calc import discount
+
+def test_discount_normal():
+    assert discount(100, 0.2) == 80.0       # 正常用例
+
+def test_discount_zero():
+    assert discount(100, 0) == 100.0        # 边界
+
+def test_discount_invalid():
+    import pytest
+    with pytest.raises(ValueError):        # 期望抛异常
+        discount(100, 1.5)</code></pre>
+        </div>
+
+        <h2 data-section="fixture" id="fixture">fixture 与 mock</h2>
+        <p>测试常需要"准备数据/环境"。<strong>fixture</strong> 提供可复用的测试前置；<strong>mock</strong> 用来替换外部依赖（数据库、网络），让测试只验证自身逻辑、又快又稳。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">import pytest
+from unittest.mock import patch
+from app import create_app, db, Todo
+
+@pytest.fixture
+def client():
+    app = create_app()
+    app.config["TESTING"] = True
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"  # 内存库，测完即弃
+    with app.app_context():
+        db.create_all()
+    return app.test_client()
+
+def test_create_todo(client):
+    resp = client.post("/api/todos", json={"task": "写测试"})
+    assert resp.status_code == 201
+    assert resp.get_json()["task"] == "写测试"
+
+# mock 外部调用（不真的发网络）
+@patch("app.notify.send_email")
+def test_register_sends_email(fake_send):
+    register_user("alice")
+    fake_send.assert_called_once()    # 只验证"调用过"，不发真邮件</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：测试框架</div>
+          <p>pytest 对应前端的 <strong>Vitest/Jest</strong>：<code class="inline">assert</code> 对应 <code class="inline">expect</code>，fixture 对应 <code class="inline">beforeEach</code>，mock 对应 <code class="inline">vi.fn()/jest.fn()</code>。思路一致——隔离被测单元、用替身代替依赖、断言行为。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// Vitest 写法（对照 pytest）
+import { test, expect, vi } from "vitest";
+test("discount", () => {
+  expect(discount(100, 0.2)).toBe(80);
+});
+const fakeSend = vi.fn();
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="profile" id="profile">性能分析</h2>
+        <p>优化前先<strong>测量</strong>，凭直觉优化常找错地方。Python 自带 <code class="inline">cProfile</code> 统计每个函数耗时，帮你定位真正瓶颈。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-bash"># 命令行分析某个脚本
+python -m cProfile -s tottime app.py
+
+# 输出按总耗时排序，找出最慢的函数
+# 也可用 snakeviz 可视化 profile 结果
+pip install snakeviz
+python -m cProfile -o out.prof app.py &amp;&amp; snakeviz out.prof</code></pre>
+        </div>
+
+        <div class="figure">
+          <svg viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <rect x="20" y="20" width="160" height="40" rx="6" fill="#fff" stroke="#3776AB" stroke-width="2"/>
+            <text x="100" y="45" text-anchor="middle" font-size="12" fill="#2c3e50">慢？靠猜 ❌</text>
+            <rect x="200" y="20" width="160" height="40" rx="6" fill="#fff" stroke="#3776AB" stroke-width="2"/>
+            <text x="280" y="45" text-anchor="middle" font-size="12" fill="#2c3e50">cProfile 测量 ✓</text>
+            <rect x="380" y="20" width="160" height="40" rx="6" fill="#eafaf0" stroke="#27ae60" stroke-width="2"/>
+            <text x="460" y="45" text-anchor="middle" font-size="12" fill="#2c3e50">定位瓶颈函数</text>
+            <rect x="120" y="80" width="320" height="40" rx="6" fill="#fff3e0" stroke="#f39c12" stroke-width="2"/>
+            <text x="280" y="105" text-anchor="middle" font-size="12" fill="#2c3e50">优化最耗时处 → 重测验证</text>
+          </svg>
+          <p class="figure-caption">示意图：性能优化循环 —— 猜测 → 测量 → 定位 → 优化 → 重测，用数据驱动而非直觉。</p>
+        </div>
+
+        <h2 data-section="cache" id="cache">缓存与异步任务</h2>
+        <p>常见提速手段：把重复计算或数据库查询结果<strong>缓存</strong>（如 Redis）；把耗时操作（发邮件、生成报表）丢到<strong>异步任务</strong>后台执行（如 Celery），不阻塞主请求。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 简易内存缓存（functools.lru_cache）
+from functools import lru_cache
+
+@lru_cache(maxsize=128)
+def expensive(n):
+    # 结果按参数缓存，相同参数不再重算
+    return sum(i * i for i in range(n))
+
+# 进阶：Redis 缓存 + Celery 异步任务
+# pip install redis celery
+from celery import Celery
+celery = Celery("tasks", broker="redis://localhost:6379/0")
+
+@celery.task
+def send_welcome_email(user_id):
+    # 异步执行，不阻塞主请求
+    ...
+
+# 视图里触发
+@celery.task
+def register():
+    send_welcome_email.delay(uid)   # .delay 把任务丢后台
+    return "注册成功"</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>缓存要考虑"<strong>失效</strong>"：数据更新后要清除或更新对应缓存，否则读到旧数据。可设过期时间（TTL）或主动失效。数据库查询的 N+1 问题（循环里查库）也常是性能杀手，用 <code class="inline">joinedload</code> 一次取出关联数据。</p>
+        </div>
+
+        <h2 data-section="load" id="load">压力测试</h2>
+        <p>上线前用<strong>压测</strong>摸清系统承载：每秒能处理多少请求、响应时间分布、瓶颈在哪。<strong>locust</strong> 用 Python 写测试脚本，模拟大量并发用户。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-bash">pip install locust</code></pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># locustfile.py
+from locust import HttpUser, task, between
+
+class TodoUser(HttpUser):
+    wait_time = between(1, 3)        # 每个用户每次请求间隔 1~3 秒
+
+    @task
+    def list_todos(self):
+        self.client.get("/api/todos")    # 模拟访问列表接口
+
+# 启动：locust，浏览器打开 http://localhost:8089
+# 设置并发用户数与每秒启动数，观察 RPS、响应时间、失败率</code></pre>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">项目案例：测试与优化待办 API</div>
+          <p>综合本章：给待办 API 写测试，再压测找瓶颈，最后加缓存优化：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Bash</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-bash"># 1. 跑测试套件
+pytest -v                          # 全绿才能上线
+
+# 2. 压测基线
+locust                            # 发现 GET /api/todos 在 100 并发时 RPS=120
+
+# 3. 分析：列表接口每次都查库
+#    优化：给列表接口加 1 秒短缓存
+# 4. 重测：RPS 提升到 800，响应时间下降</code></pre>
+          </div>
+          <p>这就是"测试保质量、压测定基线、优化看数据、再测验证"的完整闭环。</p>
+        </div>
+
+        <div class="keypoints">
+          <div class="keypoints-label">本章核心要点</div>
+          <ul>
+            <li><strong>pytest</strong>：用 assert 写测试，自动发现 test_ 开头函数与文件。</li>
+            <li><strong>fixture</strong> 准备环境，<strong>mock</strong> 替换外部依赖，测试快而稳。</li>
+            <li>优化前先<strong>测量</strong>：<code class="inline">cProfile</code> 定位真正瓶颈，别靠猜。</li>
+            <li><strong>缓存</strong>（lru_cache/Redis）减少重复计算，注意失效策略。</li>
+            <li><strong>异步任务</strong>（Celery）把耗时操作丢后台，主请求快速返回。</li>
+            <li><strong>locust</strong> 压测验证承载，用 RPS/响应时间/失败率衡量。</li>
+          </ul>
+        </div>
+
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>写测试</strong> — 给前面的 <code class="inline">discount</code> 函数补全覆盖正常/边界/异常的测试。</li>
+            <li><strong>API 测试</strong> — 用 fixture + test_client 测试待办 API 的增删查。</li>
+            <li><strong>性能分析</strong> — 用 cProfile 分析一个慢函数，定位最耗时行并优化。</li>
+            <li><strong>压测</strong> — 用 locust 压测待办 API，记录基线 RPS，加缓存后对比提升。</li>
+          </ol>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="deploy.html">
+            <span class="nav-label">← 上一章</span>
+            <span class="nav-title">第二十三章：部署与 CI/CD</span>
+          </a>
+          <a href="../tutorials.html" class="next">
+            <span class="nav-label">完成 →</span>
+            <span class="nav-title">返回教程目录</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand"><h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3><p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p></div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p><p>Built with HTML, CSS &amp; JavaScript</p></div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

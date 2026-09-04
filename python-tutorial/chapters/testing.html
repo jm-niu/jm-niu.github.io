@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十二章：调试与测试 — Python 学习教程</title>
+  <meta name="description" content="Python调试与测试教程，学习assert断言、logging与pdb调试、unittest单元测试框架以及doctest文档测试。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <span>Python</span>
+      </a>
+      <button class="nav-toggle" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <!-- Sidebar -->
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#assert" class="active">断言 assert</a></li>
+          <li><a href="#debug">调试方法</a></li>
+          <li><a href="#unittest">单元测试</a></li>
+          <li><a href="#doctest">文档测试 doctest</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a>
+          <span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a>
+          <span class="separator">/</span>
+          <span>调试与测试</span>
+        </div>
+
+        <h1>第十二章：调试与测试</h1>
+        <div class="chapter-meta">
+          <span>难度：高级</span>
+          <span>预计学习时间：1 周</span>
+          <span>前置知识：函数、异常处理基础</span>
+        </div>
+
+        <p>写完代码只是第一步，确保它「正确」同样重要。本章介绍 Python 中常用的断言、调试与测试手段：<code class="inline">assert</code> 做开发期自检，<code class="inline">logging</code> / <code class="inline">pdb</code> 帮你定位问题，<code class="inline">unittest</code> 与 <code class="inline">doctest</code> 则把验证固化成可重复运行的测试。</p>
+
+        <!-- assert -->
+        <h2 data-section="assert">断言 assert</h2>
+        <p><code class="inline">assert 条件, "提示信息"</code> 用于「程序在这里本应成立」的检查：条件为真时什么也不发生，为假时抛出 <code class="inline">AssertionError</code>。它适合<strong>开发期内部自检</strong>，例如函数前置条件。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">def divide(a, b):
+    assert b != 0, "除数不能为零"
+    return a / b
+
+print(divide(10, 2))   # 5.0
+# print(divide(10, 0)) # AssertionError: 除数不能为零
+</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p><code class="inline">assert</code> 会被 <code class="inline">python -O</code> 优化开关整体移除，因此<strong>不能用于运行期的数据校验</strong>（如用户输入合法性检查）。这类场景应主动抛出 <code class="inline">ValueError</code> / <code class="inline">TypeError</code> 等异常。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：console.assert 与 assert 模块</div>
+          <p>Python 的 <code class="inline">assert</code> 对应 JS 的 <code class="inline">console.assert</code> 与 Node 内置的 <code class="inline">assert</code> 模块：都用于「期望条件成立，否则报错」，都属于开发期/测试期校验。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// 浏览器 / Node 中的 console.assert
+console.assert(2 + 2 === 4, "加法应该正确");
+console.assert(1 > 2, "这条断言会失败");
+
+// Node.js 内置 assert 模块
+const assert = require("assert");
+assert.strictEqual(10 / 2, 5);
+// assert.strictEqual(1, "1"); // AssertionError
+</code></pre>
+          </div>
+        </div>
+
+        <!-- 调试 -->
+        <h2 data-section="debug">调试方法</h2>
+        <p>当程序行为不符合预期，常用的调试手段从「随手打印」到「专业工具」依次递进：<code class="inline">print</code> 最快捷，<code class="inline">logging</code> 可分级持久化输出，<code class="inline">pdb</code> 则提供断点级的交互式单步调试。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">import logging
+
+# 1) print 大法：最快但难以关闭
+def process(data):
+    print("当前数据:", data)
+    return data * 2
+
+# 2) logging 分级：可控制级别、写文件
+logging.basicConfig(level=logging.INFO)
+logging.debug("调试信息（默认不显示）")
+logging.info("程序启动")
+logging.warning("内存占用偏高")
+
+# 3) pdb 交互调试：在指定位置断住
+def buggy(x):
+    import pdb; pdb.set_trace()
+    return x + 1
+</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p><code class="inline">pdb</code> 常用命令：<code class="inline">n</code> 单步、<code class="inline">s</code> 步入函数、<code class="inline">c</code> 继续、<code class="inline">p 变量</code> 打印值、<code class="inline">l</code> 查看当前代码。Python 3.7+ 还支持更简洁的断点函数 <code class="inline">breakpoint()</code>。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：debugger 与 DevTools</div>
+          <p>Python 的 <code class="inline">pdb.set_trace()</code> 相当于 JS 的 <code class="inline">debugger</code> 语句——在源码里插一个断点，运行到此处时由调试器（Chrome DevTools / VS Code）接管，可单步、查看变量、调用栈。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">function process(data) {
+  debugger;            // 打开 DevTools 时在此断住，等价于 pdb.set_trace()
+  console.log("当前数据:", data);
+  return data * 2;
+}
+const x = 21;
+console.log(process(x));  // 在 Sources 面板可逐步执行
+</code></pre>
+          </div>
+        </div>
+
+        <!-- 单元测试 -->
+        <h2 data-section="unittest">单元测试 unittest</h2>
+        <p>单元测试为「最小可测单元」（通常是函数）建立断言，保证改动不破坏既有行为。Python 标准库自带 <code class="inline">unittest</code>：用 <code class="inline">TestCase</code> 组织用例、<code class="inline">assertEqual</code> 等做断言、<code class="inline">setUp</code> 做前置准备。第三方库 <code class="inline">pytest</code> 则更简洁（不需要写类，直接用 <code class="inline">assert</code>）。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">import unittest
+
+def add(a, b):
+    return a + b
+
+class TestAdd(unittest.TestCase):
+    def setUp(self):
+        self.a = 2
+        self.b = 3
+
+    def test_add(self):
+        self.assertEqual(add(self.a, self.b), 5)
+        self.assertEqual(add(-1, 1), 0)
+
+if __name__ == "__main__":
+    unittest.main()
+
+
+# 等效的 pytest 写法：函数 + 原生 assert，无需继承
+def test_add_pytest():
+    assert add(2, 3) == 5
+    assert add(-1, 1) == 0
+</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：Jest / Vitest</div>
+          <p>Python 的 <code class="inline">unittest</code> / <code class="inline">pytest</code> 对应前端生态的 Jest / Vitest：都用 <code class="inline">test()</code>（或用例方法）+ 断言函数组织测试，<code class="inline">setUp</code> / <code class="inline">beforeEach</code> 做前置准备。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// Jest / Vitest 写法，对应 Python 的 unittest
+function add(a, b) { return a + b; }
+
+test("两个数相加", () =&gt; {
+  expect(add(2, 3)).toBe(5);
+  expect(add(-1, 1)).toBe(0);
+});
+
+// 每个测试前的准备，对应 setUp
+beforeEach(() =&gt; {
+  // 初始化共享状态
+});
+</code></pre>
+          </div>
+        </div>
+
+        <!-- doctest -->
+        <h2 data-section="doctest">文档测试 doctest</h2>
+        <p><code class="inline">doctest</code> 把「示例」直接写在函数的 docstring 里（用 <code class="inline">&gt;&gt;&gt;</code> 模拟交互提示符），再统一执行并校验输出是否与文档一致。它让文档自动成为测试，既验证代码又保证示例不过时。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">def multiply(a, b):
+    """
+    返回两数之积。
+
+    &gt;&gt;&gt; multiply(2, 3)
+    6
+    &gt;&gt;&gt; multiply(-1, 5)
+    -5
+    """
+    return a * b
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>运行 <code class="inline">python 文件名.py</code> 时 <code class="inline">doctest.testmod()</code> 静默通过表示无误；加 <code class="inline">-v</code> 参数可看到每个示例的执行详情。docstring 里的 <code class="inline">&gt;&gt;&gt;</code> 后写输入、下一行写期望输出即可。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：JSDoc 示例即测试</div>
+          <p>Python 的 <code class="inline">doctest</code> 把示例嵌进文档字符串并自动校验；前端常用 JSDoc 的 <code class="inline">@example</code> 写可运行示例，再配合文档测试工具（如 <code class="inline">doctest</code> 类库）让示例保持可运行。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">/**
+ * 返回两数之积。
+ * @example
+ * multiply(2, 3) // 6
+ * multiply(-1, 5) // -5
+ * @param {number} a
+ * @param {number} b
+ * @returns {number}
+ */
+function multiply(a, b) {
+  return a * b;
+}
+</code></pre>
+          </div>
+        </div>
+
+        <!-- Exercise -->
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>给函数加 assert</strong> — 写一个计算阶乘的函数，用 <code class="inline">assert</code> 校验参数为非负整数，并故意传入负数观察 <code class="inline">AssertionError</code>。</li>
+            <li><strong>写 pytest 测试</strong> — 为上一步的阶乘函数编写 pytest 用例，覆盖正常输入、边界值（0! = 1）与异常输入。</li>
+            <li><strong>doctest 示例</strong> — 给你常用的字符串处理函数加上 <code class="inline">&gt;&gt;&gt;</code> 示例 docstring，运行 <code class="inline">doctest.testmod()</code> 验证示例正确。</li>
+            <li><strong>logging 配置</strong> — 配置 <code class="inline">logging</code> 同时输出到控制台和文件，分别用 INFO / DEBUG 级别记录程序运行状态。</li>
+          </ol>
+        </div>
+
+        <!-- Chapter Navigation -->
+        <div class="chapter-nav">
+          <a href="../tutorials.html">
+            <span class="nav-label">← 返回目录</span>
+            <span class="nav-title">教程目录</span>
+          </a>
+          <a href="files.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第十三章：文件与IO编程</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3>
+        <p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p>
+      </div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p>
+      <p>Built with HTML, CSS &amp; JavaScript · 内容参考廖雪峰 Python 教程体系</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

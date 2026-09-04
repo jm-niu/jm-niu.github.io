@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第四章：控制流 — Python 学习教程</title>
+  <meta name="description" content="Python控制流深度教程：条件语句、for/while循环、推导式、match-case、enumerate/zip、assert，含分步骤、真实场景案例与流程图示意图。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo"><span>Python</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#conditional" class="active">条件语句</a></li>
+          <li><a href="#for">for 循环</a></li>
+          <li><a href="#while">while 循环</a></li>
+          <li><a href="#comprehension">推导式</a></li>
+          <li><a href="#match">match-case</a></li>
+          <li><a href="#enumerate">enumerate 与 zip</a></li>
+          <li><a href="#assert-flow">assert 断言</a></li>
+          <li><a href="#match-advanced">match-case 进阶</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a><span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a><span class="separator">/</span>
+          <span>控制流</span>
+        </div>
+
+        <h1>第四章：控制流</h1>
+        <div class="chapter-meta">
+          <span>难度：入门</span>
+          <span>预计学习时间：1-2 周</span>
+          <span>前置知识：基础语法、数据类型</span>
+        </div>
+
+        <p>控制流决定了程序的执行顺序——什么时候做什么、重复做多少次、根据条件走哪条路。通过条件判断和循环，你可以让程序根据不同情况执行不同逻辑、重复处理大量数据。本章将全面讲解 Python 的控制流工具，并<strong>用流程图把"程序的走向"画出来</strong>，让你对每一步都心里有数。</p>
+
+        <div class="path-hint">
+          <span class="path-chip">条件分支 if/elif/else</span>
+          <span class="path-chip">循环 for / while</span>
+          <span class="path-chip">推导式替代循环</span>
+          <span class="path-chip">结构化模式匹配</span>
+        </div>
+
+        <h2 data-section="conditional" id="conditional">条件语句</h2>
+        <p>条件语句让程序根据不同条件执行不同代码块。与 C/Java 用花括号 <code class="inline">{}</code> 不同，Python 用<strong>缩进</strong>来界定代码块——这强制了统一的代码风格，也让结构一目了然。条件本质是"求值为布尔值的表达式"，Python 会自动把对象转换（如空串、0、None 视为假）。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">score = 85
+
+if score >= 90:
+    print("优秀")
+elif score >= 80:
+    print("良好")
+elif score >= 60:
+    print("及格")
+else:
+    print("不及格")
+
+# 三元运算符 (条件表达式)
+status = "通过" if score >= 60 else "不通过"
+print(status)  # '通过'
+
+# 条件组合
+age = 25
+has_license = True
+if age >= 18 and has_license:
+    print("可以开车")
+elif age >= 18 and not has_license:
+    print("需要考驾照")
+else:
+    print("未成年")</code></pre>
+        </div>
+
+        <div class="figure">
+          <svg viewBox="0 0 520 230" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <defs>
+              <marker id="arCf" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#3776AB"/></marker>
+            </defs>
+            <polygon points="60,20 130,55 60,90 60,20" fill="#fff" stroke="#3776AB" stroke-width="2"/>
+            <text x="62" y="58" font-size="11" fill="#2c3e50">score≥90?</text>
+            <line x1="60" y1="20" x2="60" y2="-999" stroke="#fff"/>
+            <text x="150" y="58" font-size="12" fill="#27ae60">优秀</text>
+            <line x1="60" y1="90" x2="150" y2="120" stroke="#3776AB" stroke-width="2" marker-end="url(#arCf)"/>
+            <polygon points="60,120 130,155 60,190 60,120" fill="#fff" stroke="#3776AB" stroke-width="2"/>
+            <text x="62" y="158" font-size="11" fill="#2c3e50">score≥80?</text>
+            <text x="150" y="158" font-size="12" fill="#27ae60">良好</text>
+            <line x1="60" y1="190" x2="150" y2="220" stroke="#3776AB" stroke-width="2" marker-end="url(#arCf)"/>
+            <polygon points="60,220 130,255 60,290 60,220" fill="#fff" stroke="#3776AB" stroke-width="2"/>
+            <text x="62" y="258" font-size="11" fill="#2c3e50">score≥60?</text>
+            <text x="150" y="258" font-size="12" fill="#27ae60">及格</text>
+            <text x="150" y="298" font-size="12" fill="#e74c3c">不及格</text>
+          </svg>
+          <p class="figure-caption">示意图：if/elif/else 的执行流程 —— 从上往下逐个判断，命中第一个为真的分支即执行并跳出，全不中走 else。</p>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：根据订单金额自动选优惠券</div>
+          <p>电商系统里，不同区间对应不同优惠策略，if/elif 是天然的分层工具：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">def best_coupon(amount):
+    if amount >= 1000:
+        return "满1000减200"
+    elif amount >= 500:
+        return "满500减80"
+    elif amount >= 200:
+        return "满200减30"
+    else:
+        return "无门槛9折"
+
+print(best_coupon(650))   # 满500减80</code></pre>
+          </div>
+          <p>注意分支顺序：条件必须从"最严格/最大"到"最宽松"排列，否则小金额会先命中大门槛。这正是流程图顺序的意义。</p>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>能写 <code class="inline">if x &gt; 0:</code> 就不要写 <code class="inline">if x &gt; 0 == True:</code>——条件本身已是布尔值。三元表达式 <code class="inline">a if cond else b</code> 适合简单二选一，复杂逻辑仍应用完整 if/else 保持可读。</p>
+        </div>
+
+        <h2 data-section="for" id="for">for 循环</h2>
+        <p>Python 的 <code class="inline">for</code> 循环是"遍历循环"——它遍历任何<strong>可迭代对象</strong>（列表、字符串、字典、文件行、生成器等），每次取出一个元素。这与 C 的 <code class="inline">for(i=0;i&lt;n;i++)</code> 计数循环不同，更安全（不会越界）。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 遍历列表
+fruits = ["apple", "banana", "cherry"]
+for fruit in fruits:
+    print(fruit)
+
+# 使用 range()
+for i in range(5):       # 0, 1, 2, 3, 4
+    print(i)
+for i in range(2, 8):    # 2, 3, 4, 5, 6, 7
+    print(i)
+for i in range(0, 10, 2): # 0, 2, 4, 6, 8 (步长为2)
+    print(i)
+
+# enumerate — 同时获取索引和值
+for index, value in enumerate(fruits):
+    print(f"{index}: {value}")
+
+# zip — 同时遍历多个序列
+names = ["Alice", "Bob", "Carol"]
+ages = [20, 25, 30]
+for name, age in zip(names, ages):
+    print(f"{name} is {age}")
+
+# 遍历字典
+person = {"name": "Alice", "age": 25}
+for key, value in person.items():
+    print(f"{key} = {value}")
+
+# break 和 continue
+for i in range(10):
+    if i == 3:
+        continue  # 跳过本次循环
+    if i == 7:
+        break     # 终止循环
+    print(i)  # 输出: 0, 1, 2, 4, 5, 6</code></pre>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：批量处理一批文件</div>
+          <p>遍历是数据处理的主旋律。例如把目录下所有 .txt 读出并统计总行数：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">import os
+
+total_lines = 0
+for fname in os.listdir("."):
+    if not fname.endswith(".txt"):
+        continue            # 跳过非 txt
+    with open(fname, encoding="utf-8") as f:
+        n = sum(1 for _ in f)
+    total_lines += n
+    print(f"{fname}: {n} 行")
+print("总计:", total_lines, "行")</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="while" id="while">while 循环</h2>
+        <p><code class="inline">while</code> 循环在<strong>条件为真时</strong>重复执行代码块，适用于"不知道要循环多少次"的场景（如读网络流直到断开、交互式菜单、游戏主循环）。与 for 的最大区别：while 不自动推进，你必须在循环体内改变条件，否则会陷入死循环。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 基本 while 循环
+count = 0
+while count &lt; 5:
+    print(f"Count: {count}")
+    count += 1
+
+# while-else — 循环正常结束时执行 else（被 break 打断则不执行）
+n = 7
+i = 2
+while i &lt; n:
+    if n % i == 0:
+        print(f"{n} 不是质数")
+        break
+    i += 1
+else:
+    print(f"{n} 是质数")  # break 不会触发 else
+
+# 无限循环 + break — 常用于交互式程序
+while True:
+    cmd = input("输入命令 (quit 退出): ")
+    if cmd == "quit":
+        break
+    print(f"执行: {cmd}")</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p><code class="inline">while True</code> 必须配合 <code class="inline">break</code> 才有出口，否则是死循环。循环内一定要有改变条件的语句（如 <code class="inline">count += 1</code>），否则条件永远为真。调试死循环时按 <code class="inline">Ctrl+C</code> 终止。</p>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：简单的重试机制</div>
+          <p>网络请求可能偶发失败，用 while + 计数器实现"最多重试 3 次"：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">import random
+
+attempts = 0
+while attempts &lt; 3:
+    attempts += 1
+    ok = random.choice([True, False])   # 模拟请求结果
+    if ok:
+        print(f"第 {attempts} 次成功")
+        break
+    print(f"第 {attempts} 次失败，重试…")
+else:
+    print("3 次均失败，请检查网络")</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="comprehension" id="comprehension">推导式</h2>
+        <p>推导式是 Python 最优雅的特性之一，用一行代码创建新的列表/字典/集合。<strong>它本质是"循环 + 筛选 + 变换"的紧凑写法</strong>，执行效率通常优于手写 for 循环（在 C 层完成迭代）。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 列表推导式
+squares = [x**2 for x in range(10)]
+print(squares)  # [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+
+# 带条件的列表推导式
+evens = [x for x in range(20) if x % 2 == 0]
+print(evens)  # [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+
+# 带条件表达式的推导式
+labels = ["偶" if x % 2 == 0 else "奇" for x in range(5)]
+print(labels)  # ['偶', '奇', '偶', '奇', '偶']
+
+# 字典推导式
+word_len = {w: len(w) for w in ["apple", "banana", "cherry"]}
+print(word_len)  # {'apple': 5, 'banana': 6, 'cherry': 6}
+
+# 集合推导式
+unique_lengths = {len(w) for w in ["hi", "ok", "cat", "dog"]}
+print(unique_lengths)  # {2, 3}
+
+# 嵌套推导式 — 矩阵转置
+matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+transposed = [[row[i] for row in matrix] for i in range(len(matrix[0]))]
+print(transposed)  # [[1, 4, 7], [2, 5, 8], [3, 6, 9]]</code></pre>
+        </div>
+
+        <div class="figure">
+          <svg viewBox="0 0 560 140" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+            <defs>
+              <marker id="arCp" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#3776AB"/></marker>
+            </defs>
+            <rect x="20" y="50" width="130" height="40" rx="6" fill="#eef6ff" stroke="#3776AB" stroke-width="2"/>
+            <text x="85" y="75" text-anchor="middle" font-size="12" fill="#2c3e50">遍历 range(10)</text>
+            <line x1="150" y1="70" x2="220" y2="70" stroke="#3776AB" stroke-width="2" marker-end="url(#arCp)"/>
+            <rect x="220" y="50" width="120" height="40" rx="6" fill="#fff" stroke="#3776AB" stroke-width="2"/>
+            <text x="280" y="75" text-anchor="middle" font-size="12" fill="#2c3e50">筛选 x%2==0</text>
+            <line x1="340" y1="70" x2="410" y2="70" stroke="#3776AB" stroke-width="2" marker-end="url(#arCp)"/>
+            <rect x="410" y="50" width="130" height="40" rx="6" fill="#eafaf0" stroke="#27ae60" stroke-width="2"/>
+            <text x="475" y="75" text-anchor="middle" font-size="12" fill="#2c3e50">x**2 加入结果</text>
+            <text x="280" y="120" text-anchor="middle" font-size="12" fill="#6c7a89">[x**2 for x in range(10) if x%2==0] 的数据流</text>
+          </svg>
+          <p class="figure-caption">示意图：列表推导式的数据流 —— 逐个取出元素、按条件筛选、变换后收集，一气呵成。</p>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>推导式虽然优雅，但<strong>不要为了简洁牺牲可读性</strong>。如果逻辑复杂到一行难以理解（嵌套超过两层、带多个 if），请改用普通循环，并拆成有意义的变量。可读性永远优先于简洁性。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：控制流对比</div>
+          <p>Python 的 <code class="inline">for ... in</code> 对应 JS 的 <code class="inline">for...of</code>（遍历值）；推导式在 JS 中对应 <code class="inline">Array.from()</code> + <code class="inline">.map()/.filter()</code> 组合；<code class="inline">match-case</code> 类似 TS 的模式匹配提案或简化的 <code class="inline">switch-case</code>。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// JS 控制流 — 与 Python 对照
+for (const fruit of fruits) { console.log(fruit); }          // for...of
+for (const [i, v] of fruits.entries()) { console.log(`${i}: ${v}`); } // enumerate
+const squares = Array.from({ length: 10 }, (_, i) => i ** 2); // 推导式
+const evens = [...Array(20).keys()].filter(x => x % 2 === 0);
+
+switch (cmd) { case 'quit': break; default: console.log('unknown'); } // match 简化版
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="match" id="match">match-case 模式匹配</h2>
+        <p>Python 3.10+ 引入了结构化模式匹配（Structural Pattern Matching），语法类似其他语言的 switch-case，但<strong>功能强大得多</strong>：它不仅能匹配字面量，还能匹配序列结构、解构对象、绑定变量，并支持守卫条件。它特别适合解析命令、处理 JSON、实现状态机。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">def handle_command(command):
+    match command.split():
+        case ["quit"]:
+            return "退出程序"
+        case ["hello", name]:
+            return f"你好, {name}!"
+        case ["add", a, b]:
+            return int(a) + int(b)
+        case ["ls", *args]:
+            return f"列出文件, 参数: {args}"
+        case _:
+            return "未知命令"
+
+print(handle_command("hello Alice"))  # 你好, Alice!
+print(handle_command("add 3 5"))      # 8</code></pre>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：解析不同格式的 API 响应</div>
+          <p>接口可能返回多种结构，用 match 一次性归类处理：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">def parse(resp):
+    match resp:
+        case {"status": "ok", "data": data}:
+            return f"成功，{len(data)} 条"
+        case {"status": "error", "msg": msg}:
+            return f"失败：{msg}"
+        case _:
+            return "无法识别的响应"
+
+print(parse({"status": "ok", "data": [1, 2]}))   # 成功，2 条
+print(parse({"status": "error", "msg": "超时"}))  # 失败：超时</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="enumerate">enumerate 与 zip</h2>
+        <p>遍历时常常需要同时拿到索引和值，或并行遍历多个序列。Python 内置的 <code class="inline">enumerate</code>、<code class="inline">zip</code> 和 <code class="inline">reversed</code> 让这类需求变得优雅，且避免了用 <code class="inline">range(len(...))</code> 这种不够 Pythonic 的写法。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">fruits = ["apple", "banana", "cherry"]
+
+# enumerate — 同时拿到索引和值，可指定起始序号
+for i, f in enumerate(fruits, start=1):
+    print(f"{i}. {f}")
+
+# zip — 并行遍历多个序列 (以最短为准)
+names = ["Alice", "Bob", "Carol"]
+ages = [20, 25, 30]
+for name, age in zip(names, ages):
+    print(f"{name} is {age}")
+
+# zip 配合 dict 构造键值对
+user = dict(zip(["name", "age"], ["Alice", 20]))
+print(user)  # {'name': 'Alice', 'age': 20}
+
+# reversed — 反向遍历
+for f in reversed(fruits):
+    print(f)
+
+# 配合推导式
+pairs = [(i, f) for i, f in enumerate(fruits)]</code></pre>
+        </div>
+
+        <div class="scenario">
+          <div class="scenario-label">实际场景：把两张表按行"合并"</div>
+          <p>例如把"学生名"和"对应成绩"两列组合成 (名字, 分数) 对：</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-python">students = ["Alice", "Bob", "Carol"]
+scores = [90, 85, 92]
+report = list(zip(students, scores))
+print(report)   # [('Alice', 90), ('Bob', 85), ('Carol', 92)]
+for name, s in report:
+    print(f"{name}: {s} 分")</code></pre>
+          </div>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：遍历与解构</div>
+          <p>Python 的 <code class="inline">enumerate</code> 对应 JS 数组的 <code class="inline">entries()</code>，二者都返回 <code class="inline">[index, value]</code> 形式，配合解构即可同时取索引和值。<code class="inline">zip</code> 则类似用 <code class="inline">map</code> 同时遍历两个数组。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">const fruits = ["apple", "banana", "cherry"];
+for (const [i, f] of fruits.entries()) { console.log(`${i}. ${f}`); }
+const names = ["Alice", "Bob"], ages = [20, 25];
+names.map((name, i) => `${name} is ${ages[i]}`);
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="assert-flow" id="assert-flow">assert 断言</h2>
+        <p><code class="inline">assert 条件, "错误信息"</code> 用于开发期校验：条件为 True 时什么都不做，为 False 时抛出 <code class="inline">AssertionError</code>。它适合捕捉"本不该发生"的内部错误，而非处理用户输入（后者用异常）。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">def divide(a, b):
+    assert b != 0, "除数不能为 0"
+    return a / b
+
+print(divide(10, 2))   # 5.0
+# divide(10, 0)        # AssertionError: 除数不能为 0
+
+# 校验函数参数类型（内部契约）
+def normalize(items):
+    assert isinstance(items, list), "items 必须是 list"
+    return [x for x in items if x is not None]
+
+# 注意：用 python -O 运行时，assert 会被整体忽略 (不执行)
+# 因此不要依赖 assert 做安全/数据校验，详见「调试与测试」章</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>断言可被 <code class="inline">python -O</code>（优化模式）整体关闭，因此<strong>千万别用 <code class="inline">assert</code> 来做权限校验或关键数据校验</strong>——这类场景应使用显式的 <code class="inline">if ... raise</code> 异常，因为优化模式下 assert 不会执行，等于形同虚设。</p>
+        </div>
+
+        <h2 data-section="match-advanced">match-case 进阶</h2>
+        <p>Python 3.10+ 的结构化模式匹配不仅能匹配字面量，还支持守卫（guard）、序列模式和解构匹配，非常适合解析结构化数据（如命令、AST、JSON）。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python">def classify(x):
+    match x:
+        case n if n &lt; 0:        # 守卫：附加条件
+            return "负数"
+        case 0:
+            return "零"
+        case n if n &gt; 100:
+            return "超大数"
+        case _:
+            return "普通正数"
+
+print(classify(-5))   # 负数
+print(classify(200))  # 超大数
+
+# 序列模式 + 解构匹配
+def describe_point(pt):
+    match pt:
+        case (0, 0):
+            return "原点"
+        case (x, 0):
+            return f"在 X 轴上, x={x}"
+        case (0, y):
+            return f"在 Y 轴上, y={y}"
+        case (x, y):
+            return f"普通点 ({x}, {y})"
+
+print(describe_point((0, 0)))   # 原点
+print(describe_point((3, 4)))   # 普通点 (3, 4)
+
+# 解构嵌套结构 (带通配 *args)
+def handle(msg):
+    match msg:
+        case ["login", user, *rest]:
+            return f"登录: {user}, 附加: {rest}"
+        case _:
+            return "未知消息"
+
+print(handle(["login", "Alice", "admin"]))  # 登录: Alice, 附加: ['admin']</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p><code class="inline">case _</code> 是"通配符"（类似 JS 的 <code class="inline">default</code>），必须放在最后。守卫 <code class="inline">if 条件</code> 在模式匹配成功后再判断，可写出非常精确的分支逻辑。模式是按书写顺序匹配，命中即停，因此要把更具体的模式写在前面。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：模式匹配</div>
+          <p>TS 4.7+ 的实验性模式匹配提案与 Python <code class="inline">match-case</code> 思路一致；在 JS 中通常用 <code class="inline">switch</code> 配合解构近似实现，但 JS 的 <code class="inline">switch</code> 只做相等比较，没有结构化/守卫能力。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// JS 写法 — switch 仅能做相等匹配
+function classify(x) {
+  if (x &lt; 0) return "负数";      // JS 用 if 模拟守卫
+  if (x === 0) return "零";
+  if (x &gt; 100) return "超大数";
+  return "普通正数";
+}
+function describePoint([x, y]) {  // 手动解构
+  if (x === 0 &amp;&amp; y === 0) return "原点";
+  if (y === 0) return `在 X 轴上, x=${x}`;
+  return `普通点 (${x}, ${y})`;
+}
+</code></pre>
+          </div>
+        </div>
+
+        <div class="keypoints">
+          <div class="keypoints-label">本章核心要点</div>
+          <ul>
+            <li><strong>if/elif/else</strong>：条件自上而下判断，命中第一个为真分支即跳出；顺序是"严→宽"。</li>
+            <li><strong>for</strong> 遍历可迭代对象（不会越界）；<code class="inline">break</code> 跳出、<code class="inline">continue</code> 跳过本次。</li>
+            <li><strong>while</strong> 条件为真时循环，必须有推进条件的语句或 <code class="inline">break</code>，否则死循环。</li>
+            <li><strong>推导式</strong>：一行完成"遍历+筛选+变换"，复杂逻辑改回普通循环。</li>
+            <li><strong>enumerate/zip</strong>：优雅地同时取索引、并行遍历、构造字典。</li>
+            <li><strong>match-case</strong>（3.10+）：结构化模式匹配，适合解析命令/JSON/状态机，支持守卫与解构。</li>
+            <li><strong>assert</strong> 仅用于开发期内部契约，优化模式下会被关闭，不可用于安全校验。</li>
+          </ul>
+        </div>
+
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>猜数字游戏</strong> — 程序随机生成 1-100 的数字，用户循环猜数，程序提示"大了"或"小了"，直到猜中为止（用 while + break）。</li>
+            <li><strong>九九乘法表</strong> — 用嵌套 for 循环输出格式整齐的九九乘法表。</li>
+            <li><strong>FizzBuzz</strong> — 打印 1-100，3 的倍数输出 Fizz，5 的倍数输出 Buzz，3 和 5 的倍数输出 FizzBuzz（用推导式或循环）。</li>
+            <li><strong>简易菜单系统</strong> — 用 while 循环实现菜单驱动的小程序，用户可以选择不同功能，直到选择退出。</li>
+            <li><strong>match 解析器</strong> — 用 match-case 写一个简易计算器：输入 <code class="inline">"add 3 5"</code> 返回 8，<code class="inline">"mul 2 4"</code> 返回 8，未知命令返回提示。</li>
+          </ol>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="datatypes.html">
+            <span class="nav-label">← 上一章</span>
+            <span class="nav-title">第三章：数据类型</span>
+          </a>
+          <a href="functions.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第五章：函数</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand"><h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3><p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p></div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p><p>Built with HTML, CSS &amp; JavaScript</p></div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

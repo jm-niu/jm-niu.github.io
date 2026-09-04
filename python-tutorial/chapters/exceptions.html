@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十一章：异常处理 — Python 学习教程</title>
+  <meta name="description" content="Python异常处理教程，学习try-except结构、自定义异常和最佳实践。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo"><span>Python</span></a>
+      <button class="nav-toggle" aria-label="菜单"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#tryexcept" class="active">try-except 结构</a></li>
+          <li><a href="#multiple">捕获多种异常</a></li>
+          <li><a href="#custom">自定义异常</a></li>
+          <li><a href="#raise">raise 与异常链</a></li>
+          <li><a href="#best">最佳实践</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a><span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a><span class="separator">/</span>
+          <span>异常处理</span>
+        </div>
+
+        <h1>第十一章：异常处理</h1>
+        <div class="chapter-meta">
+          <span>难度：高级</span>
+          <span>预计学习时间：1 周</span>
+          <span>前置知识：函数、文件操作</span>
+        </div>
+
+        <p>异常处理是编写健壮程序的关键。Python 用 <code class="inline">try-except</code> 结构捕获和处理异常，让程序在遇到错误时优雅地处理，而不是直接崩溃。</p>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比</div>
+          <p>Python 的 <code class="inline">try-except</code> 对应 JS 的 <code class="inline">try-catch</code>，结构几乎一一对应：Python 的 <code class="inline">except</code> = JS 的 <code class="inline">catch</code>，<code class="inline">finally</code> 两边都一样，<code class="inline">else</code> 是 Python 独有（无异常时执行）。Python 按异常类型捕获，JS 按条件判断 <code class="inline">e instanceof</code>。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// JS 写法
+try {
+  JSON.parse(badJson);
+} catch (e) {
+  if (e instanceof SyntaxError) console.log("JSON 格式错误");
+} finally {
+  cleanup();
+}
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="tryexcept" id="tryexcept">try-except 结构</h2>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 基本结构
+try:
+    num = int(input("输入数字: "))
+    print(f"100 / {num} = {100 / num}")
+except ValueError:
+    print("输入的不是有效数字")
+except ZeroDivisionError:
+    print("不能除以零")
+
+# 完整结构: try-except-else-finally
+try:
+    f = open("data.txt", "r")
+    content = f.read()
+except FileNotFoundError:
+    print("文件不存在")
+else:
+    print(content)  # 无异常时执行
+finally:
+    print("清理资源")  # 总会执行</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比</div>
+          <p>Python 的 <code class="inline">else</code> 块是 JS 没有的 —— 它只在 try 块没有抛出异常时执行。在 JS 中你通常会把"成功逻辑"直接写在 try 块末尾，但这有个问题：如果成功逻辑本身抛错，会被同一个 catch 捕获，难以区分。Python 的 <code class="inline">else</code> 完美解决了这个问题。</p>
+        </div>
+
+        <h2 data-section="multiple" id="multiple">捕获多种异常</h2>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 捕获多种异常类型 (元组形式)
+try:
+    value = int("abc")
+except (ValueError, TypeError) as e:
+    print(f"类型错误: {e}")
+
+# 获取异常信息
+try:
+    1 / 0
+except ZeroDivisionError as e:
+    print(f"异常类型: {type(e).__name__}")  # ZeroDivisionError
+    print(f"异常信息: {e}")              # division by zero
+
+# 捕获所有异常 (不推荐，但要知道)
+try:
+    result = risky_operation()
+except Exception as e:
+    print(f"发生错误: {e}")
+    import traceback
+    traceback.print_exc()  # 打印完整堆栈</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>永远不要用裸 <code class="inline">except:</code>（不带异常类型），它会捕获包括 <code class="inline">KeyboardInterrupt</code> 在内的所有异常，导致 <code class="inline">Ctrl+C</code> 都无法中断程序。至少用 <code class="inline">except Exception:</code>。</p>
+        </div>
+
+        <h2 data-section="custom" id="custom">自定义异常类</h2>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 自定义异常 — 继承 Exception
+class InsufficientFundsError(Exception):
+    """余额不足异常"""
+    def __init__(self, balance, amount):
+        self.balance = balance
+        self.amount = amount
+        self.deficit = amount - balance
+        super().__init__(
+            f"余额不足: 需要 {amount}, 仅有 {balance}, 差 {self.deficit}"
+        )
+
+# 使用自定义异常
+class Account:
+    def __init__(self, balance):
+        self.balance = balance
+    
+    def withdraw(self, amount):
+        if amount &gt; self.balance:
+            raise InsufficientFundsError(self.balance, amount)
+        self.balance -= amount
+        return self.balance
+
+# 捕获自定义异常
+acc = Account(100)
+try:
+    acc.withdraw(150)
+except InsufficientFundsError as e:
+    print(e)              # 余额不足: 需要 150, 仅有 100, 差 50
+    print(f"差额: {e.deficit}")  # 访问自定义属性</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比</div>
+          <p>Python 自定义异常继承 <code class="inline">Exception</code>，对应 JS 中继承 <code class="inline">Error</code> 类。TypeScript 中你可以这样定义带类型的自定义错误：</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">class InsufficientFundsError extends Error {
+  balance: number;
+  amount: number;
+  constructor(balance: number, amount: number) {
+    super(`余额不足: 需要 ${amount}`);
+    this.name = "InsufficientFundsError";
+    this.balance = balance;
+    this.amount = amount;
+  }
+}
+
+throw new InsufficientFundsError(100, 150);
+</code></pre>
+          </div>
+          <p>注意：Python 异常用 <code class="inline">raise</code> 抛出，JS/TS 用 <code class="inline">throw</code>。Python 自定义异常自动支持 <code class="inline">except ... as e</code> 解构，JS 需要 <code class="inline">e instanceof</code> 判断。</p>
+        </div>
+
+        <h2 data-section="raise" id="raise">raise 与异常链</h2>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># raise — 主动抛出异常
+def set_age(age):
+    if not isinstance(age, int):
+        raise TypeError("年龄必须是整数")
+    if age &lt; 0 or age &gt; 150:
+        raise ValueError(f"年龄 {age} 不合理")
+    return age
+
+# 异常链 — raise ... from
+def load_config(path):
+    try:
+        with open(path) as f:
+            import json
+            return json.load(f)
+    except FileNotFoundError as e:
+        # 重新抛出为更上层的异常，保留原始异常链
+        raise RuntimeError("配置加载失败") from e
+
+# 主动抑制异常链 (raise from None)
+try:
+    int("abc")
+except ValueError:
+    raise MyError("处理失败") from None  # 不显示原始异常</code></pre>
+        </div>
+
+        <h2 data-section="best" id="best">异常处理最佳实践</h2>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># ❌ 错误：捕获过宽，吞掉异常
+try:
+    do_something()
+except:
+    pass  # 永远不要这样做！
+
+# ✅ 正确：捕获具体异常，记录日志
+import logging
+logger = logging.getLogger(__name__)
+
+try:
+    do_something()
+except SpecificError as e:
+    logger.exception("操作失败")  # 自动记录堆栈
+    raise  # 重新抛出，让上层处理
+
+# EAFP 原则 — "请求宽恕比许可容易"
+# Python 风格优先用异常而非预先检查
+
+# ❌ LBYL 风格 (Look Before You Leap)
+if "key" in data:
+    value = data["key"]
+else:
+    value = None
+
+# ✅ EAFP 风格 (Pythonic)
+try:
+    value = data["key"]
+except KeyError:
+    value = None</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比</div>
+          <p>Python 的 EAFP（请求宽恕比许可容易）哲学与 JS 风格不同。JS/TS 前端开发更倾向 LBYL（先检查再执行），因为 <code class="inline">try-catch</code> 在 V8 中性能开销较大，且 async/await 的错误处理已经够复杂。但 Python 中 EAFP 是推荐风格，异常处理开销很小。在 TS 中，你可以用类型守卫替代异常：</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// TS 用类型守卫 (LBYL 风格)
+function getValue(data: unknown): string | null {
+  if (typeof data === "object" &amp;&amp; data !== null &amp;&amp; "key" in data) {
+    return String((data as any).key);
+  }
+  return null;
+}
+</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="debug-tips">调试技巧</h2>
+        <p>写出能跑的代码只是第一步，定位问题才是日常大头。Python 提供从最朴素到最专业的多种调试手段：临时用 <code class="inline">print</code> 输出中间值、用 <code class="inline">logging</code> 按级别记录日志、以及用 <code class="inline">pdb</code> 进行交互式单步调试。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># 1) print 大法 — 快速但临时
+def process(items):
+    print("items:", items)   # 临时查看
+    return [x * 2 for x in items]
+
+# 2) logging 分级 — 可长期保留、按级别过滤
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logging.debug("调试信息")
+logging.info("一般信息")
+logging.warning("警告")
+logging.error("错误")
+
+# 3) pdb 交互调试 — 在问题处停下，逐行检查
+def buggy(x, y):
+    import pdb; pdb.set_trace()   # 程序会在这里暂停
+    return x / y                  # 可在提示符下查看 x、y</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">调试建议</div>
+          <p><code class="inline">pdb.set_trace()</code> 暂停后，可用 <code class="inline">n</code>（下一行）、<code class="inline">s</code>（单步进入）、<code class="inline">c</code>（继续）、<code class="inline">p 变量名</code>（打印变量）来探查。Python 3.7+ 也可用内置的 <code class="inline">breakpoint()</code> 代替。</p>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比</div>
+          <p>Python 的 <code class="inline">pdb.set_trace()</code> 对应浏览器的 <code class="inline">debugger</code> 语句或直接在 Chrome DevTools 里打断点；<code class="inline">print</code> 则对应 <code class="inline">console.log</code>。区别是 Python 没有浏览器那样开箱即用的可视化调试器，pdb 是命令行交互式。</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">JavaScript</span><button class="copy-btn">复制</button></div>
+            <pre><code class="language-javascript">// 浏览器中加断点（类似 pdb.set_trace()）
+function buggy(x, y) {
+  debugger;                 // DevTools 会在此暂停
+  return x / y;
+}
+console.log("调试信息");     // 类似 print</code></pre>
+          </div>
+        </div>
+
+        <h2 data-section="assert-exc">assert 与异常处理</h2>
+        <p><code class="inline">assert</code> 用于开发期校验「绝不该发生」的内部前提；而面向用户的输入校验、可预期的外部错误，应当用 <code class="inline">raise</code> 抛出明确的异常。两者使用场景不同：assert 可被 <code class="inline">python -O</code> 优化开关整体关闭，绝不能依赖它来做正式校验。</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Python</span><button class="copy-btn">复制</button></div>
+          <pre><code class="language-python"># assert — 开发期自检，可被 -O 关闭
+def divide(a, b):
+    assert b != 0, "除数不能为 0"
+    return a / b
+
+# 正式校验 — 用 raise 抛明确异常
+def set_age(age):
+    if not isinstance(age, int):
+        raise TypeError("年龄必须是整数")
+    if age &lt; 0:
+        raise ValueError("年龄不能为负")
+    return age
+
+# assert 在优化模式下会被跳过（不要依赖它做校验）
+import sys
+print(sys.flags.optimize)   # 1 表示 -O 已开启，assert 不执行</code></pre>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-label">注意</div>
+          <p>不要把 <code class="inline">assert</code> 当异常处理用。用 <code class="inline">python -O</code> 或 <code class="inline">PYTHONOPTIMIZE=1</code> 运行程序时，所有 <code class="inline">assert</code> 语句会被直接删除，依赖它的校验逻辑将失效。</p>
+        </div>
+
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>健壮的计算器</strong> — 改造之前的计算器，用异常处理所有可能的错误：非法输入、除以零、运算符错误。</li>
+            <li><strong>配置文件加载器</strong> — 读取 JSON 配置文件，处理文件不存在、JSON 格式错误、必需字段缺失等异常，定义自定义异常类。</li>
+            <li><strong>用户注册系统</strong> — 实现注册功能，自定义 <code class="inline">UsernameExistsError</code>、<code class="inline">WeakPasswordError</code> 等异常类。</li>
+            <li><strong>批量数据处理</strong> — 处理一批数据，单条出错不影响整体，记录错误日志并继续处理后续数据。</li>
+          </ol>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="oop-advanced.html">
+            <span class="nav-label">← 上一章</span>
+            <span class="nav-title">第十章：面向对象高级编程</span>
+          </a>
+          <a href="testing.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第十二章：调试与测试</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand"><h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3><p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p></div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p><p>Built with HTML, CSS &amp; JavaScript · 内容参考廖雪峰 Python 教程体系</p></div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

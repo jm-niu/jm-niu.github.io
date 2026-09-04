@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十五章：常用内置模块 — Python 学习教程</title>
+  <meta name="description" content="Python 标准库常用内置模块教程，涵盖 datetime、collections、itertools、base64/hashlib/hmac、contextlib、urllib 的使用与实战示例。">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233776AB'/><text x='50' y='68' font-size='52' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Py</text></svg>">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="../index.html" class="nav-logo">
+        <span>Python</span>
+      </a>
+      <button class="nav-toggle" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="../index.html">首页</a></li>
+        <li><a href="../tutorials.html" class="active">教程目录</a></li>
+        <li><a href="../resources.html">资源下载</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chapter-detail">
+      <!-- Sidebar -->
+      <aside class="chapter-sidebar">
+        <h4>本章导航</h4>
+        <ul>
+          <li><a href="#datetime" class="active">datetime</a></li>
+          <li><a href="#collections">collections</a></li>
+          <li><a href="#itertools">itertools</a></li>
+          <li><a href="#crypto">编码与摘要</a></li>
+          <li><a href="#contextlib">contextlib</a></li>
+          <li><a href="#urllib">urllib</a></li>
+          <li><a href="#exercise">练习建议</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <div class="chapter-content">
+        <div class="breadcrumb">
+          <a href="../index.html">首页</a>
+          <span class="separator">/</span>
+          <a href="../tutorials.html">教程目录</a>
+          <span class="separator">/</span>
+          <span>常用内置模块</span>
+        </div>
+
+        <h1>第十五章：常用内置模块</h1>
+        <div class="chapter-meta">
+          <span>难度：高级</span>
+          <span>预计学习时间：1-2 周</span>
+          <span>前置知识：函数、模块基础</span>
+        </div>
+
+        <p>装好 Python 就自带了一整套"标准库"，无需额外安装即可使用。本章挑选日常开发最高频的几个内置模块：处理时间的 <code class="inline">datetime</code>、增强容器 <code class="inline">collections</code>、迭代利器 <code class="inline">itertools</code>、编码与摘要工具、资源管理 <code class="inline">contextlib</code>，以及网络请求 <code class="inline">urllib</code>。</p>
+
+        <!-- datetime -->
+        <h2 data-section="datetime">datetime：时间与日期</h2>
+        <p><code class="inline">datetime</code> 模块提供 <code class="inline">datetime</code>、<code class="inline">date</code>、<code class="inline">time</code>、<code class="inline">timedelta</code> 等类型。用 <code class="inline">strftime</code> 把时间格式化为字符串，用 <code class="inline">strptime</code> 反向解析。涉及时区时使用 <code class="inline">timezone</code> 或第三方 <code class="inline">pytz</code>。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">from datetime import datetime, date, timedelta, timezone
+
+# 当前时间
+now = datetime.now()
+print(now)                     # 2026-06-23 10:22:05.123456
+print(now.strftime("%Y-%m-%d %H:%M:%S"))  # 2026-06-23 10:22:05
+
+# 解析字符串
+dt = datetime.strptime("2026-06-23", "%Y-%m-%d")
+print(dt.date())               # 2026-06-23
+
+# 日期加减
+tomorrow = date.today() + timedelta(days=1)
+last_week = now - timedelta(weeks=1)
+print(tomorrow, last_week)
+
+# 时区（UTC+8 示例）
+bj = datetime.now(timezone(timedelta(hours=8)))
+print(bj.isoformat())
+</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：日期处理</div>
+          <p>JS 内置的 <code class="inline">Date</code> 对象功能有限且 API 反直觉；生态里常用 <code class="inline">dayjs</code> / <code class="inline">moment</code>。Python 的 <code class="inline">datetime</code> 更像 dayjs：链式、可读、支持加减。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">import dayjs from "dayjs";
+
+const now = dayjs();
+console.log(now.format("YYYY-MM-DD HH:mm:ss"));
+console.log(now.add(1, "day").format("YYYY-MM-DD"));  // 明天
+console.log(now.subtract(1, "week").format("YYYY-MM-DD"));
+</code></pre>
+          </div>
+        </div>
+
+        <!-- collections -->
+        <h2 data-section="collections">collections：增强容器</h2>
+        <p>这些容器在标准 <code class="inline">dict</code>/<code class="inline">list</code>/<code class="inline">tuple</code> 之上做了增强，能写出更简洁、更高效的代码。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">from collections import Counter, defaultdict, deque, namedtuple, OrderedDict
+
+# Counter：计数
+colors = ["red", "blue", "red", "green", "blue", "red"]
+print(Counter(colors))                 # Counter({'red': 3, 'blue': 2, 'green': 1})
+print(Counter(colors).most_common(2))  # [('red', 3), ('blue', 2)]
+
+# defaultdict：访问缺失键时自动给默认值
+dd = defaultdict(list)
+dd["a"].append(1)         # 不用先判断 key 是否存在
+print(dd)                 # defaultdict(&lt;class 'list'&gt;, {'a': [1]})
+
+# deque：双端队列，两端插入/弹出都是 O(1)
+dq = deque([1, 2, 3])
+dq.appendleft(0)
+dq.append(4)
+print(dq)                 # deque([0, 1, 2, 3, 4])
+
+# namedtuple：可读的元组
+Point = namedtuple("Point", ["x", "y"])
+p = Point(3, 5)
+print(p.x, p.y)           # 3 5
+
+# OrderedDict：保持插入顺序（Python3.7+ 普通 dict 也已保序）
+od = OrderedDict()
+od["b"] = 2
+od["a"] = 1
+print(list(od.keys()))    # ['b', 'a']
+</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：容器</div>
+          <p>JS 用 <code class="inline">Map</code> 代替 <code class="inline">defaultdict</code>（Map.get 可配合 ?? 兜底），用普通数组 + <code class="inline">unshift</code>/<code class="inline">push</code> 近似 <code class="inline">deque</code>，用对象字面量近似 <code class="inline">namedtuple</code>。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// 计数 = Array + reduce
+const colors = ["red", "blue", "red"];
+const counter = colors.reduce((m, c) =&gt; {
+  m[c] = (m[c] ?? 0) + 1;
+  return m;
+}, {});
+console.log(counter);   // { red: 2, blue: 1 }
+
+// 双端队列近似
+const dq = [1, 2, 3];
+dq.unshift(0);
+dq.push(4);
+</code></pre>
+          </div>
+        </div>
+
+        <!-- itertools -->
+        <h2 data-section="itertools">itertools：迭代工具</h2>
+        <p><code class="inline">itertools</code> 提供一系列"惰性"迭代器，适合处理无限序列或组合问题，内存占用极低。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">import itertools
+
+# count：无限计数（需自行截断）
+for i in itertools.islice(itertools.count(10, 2), 5):
+    print(i)            # 10 12 14 16 18
+
+# cycle：无限循环
+print(list(itertools.islice(itertools.cycle("AB"), 5)))  # ['A','B','A','B','A']
+
+# repeat：重复
+print(list(itertools.repeat("x", 3)))                    # ['x','x','x']
+
+# chain：拼接多个迭代器
+print(list(itertools.chain([1, 2], [3, 4])))             # [1,2,3,4]
+
+# groupby：按 key 分组（需先排序）
+data = sorted(["apple", "apricot", "banana", "blue"], key=lambda s: s[0])
+for k, g in itertools.groupby(data, key=lambda s: s[0]):
+    print(k, list(g))   # a ['apple','apricot']  b ['banana','blue']
+
+# permutations：全排列
+print(list(itertools.permutations("ABC", 2)))  # 所有 2 元排列
+</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：惰性迭代</div>
+          <p>JS 没有内置 itertools，但其<strong>生成器函数</strong>（<code class="inline">function*</code> + <code class="inline">yield</code>）同样能产出惰性的无限序列，思想与 itertools 一致。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+            <pre><code class="language-javascript">// 等价的惰性计数生成器
+function* count(start = 0, step = 1) {
+  let i = start;
+  while (true) {
+    yield i;
+    i += step;
+  }
+}
+const gen = count(10, 2);
+console.log([gen.next().value, gen.next().value]);  // 10, 12
+</code></pre>
+          </div>
+        </div>
+
+        <!-- crypto -->
+        <h2 data-section="crypto">编码与摘要</h2>
+        <p><code class="inline">base64</code> 用于二进制数据编成可打印文本；<code class="inline">hashlib</code> 计算 md5 / sha256 等摘要；<code class="inline">hmac</code> 在摘要基础上加入密钥，用于校验完整性。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">import base64, hashlib, hmac
+
+# base64 编解码（处理 bytes）
+raw = b"hello python"
+enc = base64.b64encode(raw).decode()
+print(enc)                          # aGVsbG8gcHl0aG9u
+print(base64.b64decode(enc))        # b'hello python'
+
+# hashlib 摘要
+sha = hashlib.sha256(b"hello").hexdigest()
+print(sha[:16])                     # 2cf24dba5fb0a30e...（64 位十六进制）
+
+md5 = hashlib.md5(b"hello").hexdigest()
+print(md5)                          # 5d41402abc4b2a76b9719d911017c592
+
+# hmac：带密钥的摘要
+key = b"secret"
+sig = hmac.new(key, b"hello", hashlib.sha256).hexdigest()
+print(sig[:16])
+</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：编码与加密</div>
+          <p>浏览器里 <code class="inline">btoa/atob</code> 对应 base64；更强的摘要/签名走 Web Crypto API 的 <code class="inline">crypto.subtle</code>。两者都是标准算法，跨语言结果一致。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+          <pre><code class="language-javascript">// base64
+const enc = btoa("hello python");
+console.log(enc);            // aGVsbG8gcHl0aG9u
+console.log(atob(enc));      // hello python
+
+// 异步的 SHA-256（Web Crypto）
+const buf = await crypto.subtle.digest("SHA-256",
+  new TextEncoder().encode("hello"));
+console.log([...new Uint8Array(buf)].map(b =&gt;
+  b.toString(16).padStart(2, "0")).join(""));
+</code></pre>
+          </div>
+        </div>
+
+        <!-- contextlib -->
+        <h2 data-section="contextlib">contextlib：简化 with</h2>
+        <p>用 <code class="inline">@contextmanager</code> 装饰器，可以把一个普通生成器函数变成上下文管理器，省去手写 <code class="inline">__enter__/__exit__</code>；<code class="inline">closing</code> 则确保对象退出时调用 <code class="inline">.close()</code>。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">from contextlib import contextmanager, closing
+
+# 自定义上下文管理器
+@contextmanager
+def tag(name):
+    print(f"&lt;{name}&gt;")
+    yield
+    print(f"&lt;/{name}&gt;")
+
+with tag("section"):
+    print("  内容在这里")
+
+# closing：保证 close 被调用
+from urllib.request import urlopen
+with closing(urlopen("https://example.com")) as page:
+    print(page.status)
+</code></pre>
+        </div>
+
+        <div class="analogy-box">
+          <div class="analogy-label">前端 JS/TS 类比：资源清理</div>
+          <p>TS 5.2+ 的 <code class="inline">using</code> 声明（显式资源管理）与 Python 的 <code class="inline">with</code> 目标一致：离开作用域时自动释放资源（文件、连接等）。</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">JavaScript</span>
+              <button class="copy-btn">复制</button>
+            </div>
+          <pre><code class="language-javascript">// TS 5.2+：离开作用域自动调用 [Symbol.dispose]()
+function openFile(path) {
+  return {
+    read() { /* ... */ },
+    [Symbol.dispose]() { console.log("close"); }
+  };
+}
+using f = openFile("a.txt");
+f.read();   // 作用域结束自动 close
+</code></pre>
+          </div>
+        </div>
+
+        <!-- urllib -->
+        <h2 data-section="urllib">urllib：网络请求</h2>
+        <p><code class="inline">urllib.request</code> 是标准库自带的 HTTP 客户端，能抓取网页。不过实际项目更推荐第三方 <code class="inline">requests</code> 库，API 更友好。</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">Python</span>
+            <button class="copy-btn">复制</button>
+          </div>
+          <pre><code class="language-python">from urllib.request import urlopen, Request
+
+# 抓取网页（标准库方式）
+req = Request("https://example.com", headers={"User-Agent": "Mozilla/5.0"})
+with urlopen(req, timeout=10) as resp:
+    html = resp.read().decode("utf-8")
+    print(len(html), "字符")
+
+# 推荐：第三方 requests（需 pip install requests）
+# import requests
+# r = requests.get("https://example.com")
+# print(r.text)
+</code></pre>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-label">提示</div>
+          <p>标准库 urllib 写起来较啰嗦且对 HTTPS、Cookie、重定向的处理不够顺手。日常开发强烈建议安装 <code class="inline">requests</code>：一行 <code class="inline">requests.get(url)</code> 即可。</p>
+        </div>
+
+        <!-- Exercise -->
+        <div class="exercise-section" data-section="exercise" id="exercise">
+          <h3>练习建议 <span class="badge">动手实践</span></h3>
+          <ol>
+            <li><strong>词频统计</strong> — 读取一篇英文短文，用 <code class="inline">Counter</code> 统计每个单词出现次数，并打印出现最多的前 10 个词。</li>
+            <li><strong>日期计算</strong> — 计算"今天"距离你设定的某个目标日期（如 2027-01-01）还有多少天，并格式化输出剩余天数。</li>
+            <li><strong>文件摘要</strong> — 写一个函数，以二进制方式读取任意文件，返回它的 SHA-256 十六进制摘要字符串。</li>
+            <li><strong>排列组合</strong> — 用 <code class="inline">itertools.permutations</code> 或 <code class="inline">combinations</code> 求出字符 "ABCD" 中任选 3 个的所有组合。</li>
+          </ol>
+        </div>
+
+        <!-- Chapter Navigation -->
+        <div class="chapter-nav">
+          <a href="../tutorials.html">
+            <span class="nav-label">← 返回目录</span>
+            <span class="nav-title">教程目录</span>
+          </a>
+          <a href="concurrency.html" class="next">
+            <span class="nav-label">下一章 →</span>
+            <span class="nav-title">第十六章：进程与线程</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3><span class="logo-icon" style="width:28px;height:28px;font-size:0.9rem;display:inline-flex;align-items:center;justify-content:center;background:var(--color-primary);border-radius:6px;color:#fff;font-weight:800;">Py</span> Python 学习教程</h3>
+        <p>系统化学习 Python 编程语言的免费在线教程，从基础语法到项目实战，助你成为一名合格的 Python 开发者。</p>
+      </div>
+      <div class="footer-col">
+        <h4>入门基础</h4>
+        <ul>
+          <li><a href="env.html">环境搭建</a></li>
+          <li><a href="basics.html">基础语法</a></li>
+          <li><a href="datatypes.html">数据类型</a></li>
+          <li><a href="controlflow.html">控制流</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>核心进阶</h4>
+        <ul>
+          <li><a href="functions.html">函数</a></li>
+          <li><a href="advanced.html">高级特性</a></li>
+          <li><a href="functional.html">函数式编程</a></li>
+          <li><a href="modules.html">模块与包</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>面向对象与工程</h4>
+        <ul>
+          <li><a href="oop.html">面向对象</a></li>
+          <li><a href="oop-advanced.html">OOP 高级</a></li>
+          <li><a href="exceptions.html">异常处理</a></li>
+          <li><a href="testing.html">调试与测试</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>标准库与生态</h4>
+        <ul>
+          <li><a href="files.html">文件与IO</a></li>
+          <li><a href="regex.html">正则表达式</a></li>
+          <li><a href="stdlib.html">常用内置模块</a></li>
+          <li><a href="concurrency.html">进程与线程</a></li>
+          <li><a href="thirdparty.html">第三方库</a></li>
+          <li><a href="asyncio.html">异步 IO</a></li>
+          <li><a href="../resources.html">资源下载</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>实战进阶</h4>
+        <ul>
+          <li><a href="web-flask.html">Web 开发实战</a></li>
+          <li><a href="database.html">数据库与 ORM</a></li>
+          <li><a href="auth-security.html">认证与安全</a></li>
+          <li><a href="api-design.html">API 设计</a></li>
+          <li><a href="deploy.html">部署与 CI/CD</a></li>
+          <li><a href="perf-testing.html">性能与测试</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Python 学习教程. 仅供学习交流使用.</p>
+      <p>Built with HTML, CSS &amp; JavaScript · 内容参考廖雪峰 Python 教程体系</p>
+    </div>
+  </footer>
+
+  <button class="back-to-top" aria-label="回到顶部">&uarr;</button>
+
+  <script src="../js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>
